@@ -1,0 +1,11 @@
+[requires]
+gtest/1.8.0@bincrafters/stable
+cpprestsdk/2.10.2@bincrafters/stable
+date/master@p-groarke/testing
+jsonformoderncpp/3.1.2@vthiery/stable
+
+[generators]
+cmake_multi
+
+[imports]
+bin, *.pdb -> ./bin
