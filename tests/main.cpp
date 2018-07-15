@@ -31,7 +31,7 @@ TEST(connection, paladins_pc) {
 	f = createsesh_result.ret_msg.find("Approved");
 	EXPECT_NE(f, std::string::npos);
 	nlohmann::json j = createsesh_result;
-	printf("createsession response : %s\n\n", j.dump().c_str());
+	printf("createsession response : %s\n\n", j.dump(4).c_str());
 
 	str = sesh.testsession();
 	f = str.find(
@@ -43,12 +43,30 @@ TEST(connection, paladins_pc) {
 	ASSERT_GT(server_stats.size(), 0);
 	EXPECT_EQ(server_stats[0].status, "UP");
 	j = server_stats;
-	printf("getserverstatus response : %s\n\n", j.dump().c_str());
+	printf("getserverstatus response : %s\n\n", j.dump(4).c_str());
 
 	std::vector<rez::data_used> dus = sesh.getdataused();
 	EXPECT_GT(dus.size(), 0);
 	j = dus;
-	printf("getdataused response : %s\n\n", j.dump().c_str());
+	printf("getdataused response : %s\n\n", j.dump(4).c_str());
+
+	std::vector<rez::match_history> mhs = sesh.getmatchhistory("socapex");
+	EXPECT_GT(mhs.size(), 0);
+	EXPECT_EQ(mhs[0].playerName, "socapex");
+	j = mhs[0];
+	printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
+
+	std::vector<rez::demo_details> dds = sesh.getdemodetails(mhs[0].Match);
+	EXPECT_GT(dds.size(), 0);
+	EXPECT_EQ(dds[0].Match, mhs[0].Match);
+	j = dds[0];
+	printf("getdemodetails response : %s\n\n", j.dump(4).c_str());
+
+	std::vector<rez::esports_pro_league_details> eplds
+			= sesh.getesportsproleaguedetails();
+	EXPECT_GT(eplds.size(), 0);
+	j = eplds[0];
+	printf("getesportsproleaguedetails response : %s\n\n", j.dump(4).c_str());
 }
 } // namespace
 

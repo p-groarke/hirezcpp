@@ -87,9 +87,11 @@ struct session {
 						ret = resp.extract_string().get();
 					} else {
 						fwprintf(stderr,
-								L"Response invalid. Status code : "
-								L"%hu\nResponse :\n%s\n",
-								resp.status_code(), resp.to_string().c_str());
+								L"Response invalid.\nStatus code : %hu\n"
+								L"Calling end-point : %s\n"
+								L"Response :\n%s\n",
+								resp.status_code(), builder.to_string().c_str(),
+								resp.to_string().c_str());
 					}
 				})
 				.wait();
@@ -121,26 +123,25 @@ struct session {
 	// A required step to Authenticate the developerId/signature for further API
 	// use.
 	session_response createsession() {
-		session_info = nlohmann::json::parse(call(L"createsession",
-				to_wstring(dev_id), signature(L"createsession"), timestamp()));
+		session_info = nlohmann::json::parse(call(L"createsession", wdev_id(),
+				signature(L"createsession"), timestamp()));
 		return session_info;
 	}
 
 	// /testsession[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// A means of validating that a session is established.
 	std::string testsession() {
-		return call(L"testsession", to_wstring(dev_id),
-				signature(L"testsession"), to_wstring(session_info.session_id),
-				timestamp());
+		return call(L"testsession", wdev_id(), signature(L"testsession"),
+				wsession_id(), timestamp());
 	}
 
 	// /gethirezserverstatus[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// Function returns UP/DOWN status for the primary game/platform
 	// environments.  Data is cached once a minute.
 	std::vector<server_status> gethirezserverstatus() {
-		return nlohmann::json::parse(call(L"gethirezserverstatus",
-				to_wstring(dev_id), signature(L"gethirezserverstatus"),
-				to_wstring(session_info.session_id), timestamp()));
+		return nlohmann::json::parse(call(L"gethirezserverstatus", wdev_id(),
+				signature(L"gethirezserverstatus"), wsession_id(),
+				timestamp()));
 	}
 
 	// APIs
@@ -149,22 +150,28 @@ struct session {
 	// Returns API Developer daily usage limits and the current status against
 	// those limits.
 	std::vector<data_used> getdataused() {
-		return nlohmann::json::parse(call(L"getdataused", to_wstring(dev_id),
-				signature(L"getdataused"), to_wstring(session_info.session_id),
-				timestamp()));
+		return nlohmann::json::parse(call(L"getdataused", wdev_id(),
+				signature(L"getdataused"), wsession_id(), timestamp()));
 	}
 
 	// /getdemodetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
 	// Returns information regarding a particular match.  Rarely used in lieu of
 	// getmatchdetails().
-	// std::string getmodedetails() {
-
-	//}
+	std::vector<demo_details> getdemodetails(int match_id) {
+		return nlohmann::json::parse(
+				call(L"getdemodetails", wdev_id(), signature(L"getdemodetails"),
+						wsession_id(), timestamp(), std::to_wstring(match_id)));
+	}
 
 	// /getesportsproleaguedetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// Returns the matchup information for each matchup for the current eSports
 	// Pro League season.  An important return value is “match_status” which
 	// represents a match being scheduled (1), in-progress (2), or complete (3)
+	std::vector<esports_pro_league_details> getesportsproleaguedetails() {
+		return nlohmann::json::parse(call(L"getesportsproleaguedetails",
+				wdev_id(), signature(L"getesportsproleaguedetails"),
+				wsession_id(), timestamp()));
+	}
 
 	// /getfriends[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Returns the Smite User names of each of the player’s friends.  [PC only]
@@ -246,9 +253,18 @@ struct session {
 	// /getmatchhistory[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Gets recent matches and high level match statistics for a particular
 	// player.
+	std::vector<match_history> getmatchhistory(const std::string& player) {
+		return nlohmann::json::parse(call(L"getmatchhistory", wdev_id(),
+				signature(L"getmatchhistory"), wsession_id(), timestamp(),
+				to_wstring(player)));
+	}
 
 	// /getmotd[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// Returns information about the 20 most recent Match-of-the-Days.
+	std::string getmotd() {
+		return call(L"getmotd", wdev_id(), signature(L"getmotd"), wsession_id(),
+				timestamp());
+	}
 
 	// /getplayeridinfoforxboxandswitch[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{playerName}
 	// Meaningful only for the Paladins Xbox API.  Paladins Xbox data and
@@ -308,6 +324,18 @@ struct session {
 	// /getpatchinfo[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// Function returns information about current deployed patch. Currently,
 	// this information only includes patch version.
+
+	std::wstring wdev_id() const {
+		return to_wstring(dev_id);
+	}
+
+	std::wstring wauth_key() const {
+		return to_wstring(auth_key);
+	}
+
+	std::wstring wsession_id() const {
+		return to_wstring(session_info.session_id);
+	}
 
 	std::string dev_id{ "" };
 	std::string auth_key{ "" };
