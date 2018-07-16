@@ -17,7 +17,7 @@ inline std::string to_string(const std::wstring& str) {
 inline std::string dev_id;
 inline std::string auth_key;
 
-TEST(connection, paladins_pc) {
+TEST(paladins_pc, everything) {
 	rez::session sesh{ dev_id, auth_key };
 	EXPECT_EQ(sesh.dev_id, dev_id);
 	EXPECT_EQ(sesh.auth_key, auth_key);
@@ -67,6 +67,9 @@ TEST(connection, paladins_pc) {
 	EXPECT_GT(eplds.size(), 0);
 	j = eplds[0];
 	printf("getesportsproleaguedetails response : %s\n\n", j.dump(4).c_str());
+
+	// str = sesh.getfriends("socapex");
+	// printf("getfriends response : %s\n\n", str.c_str());
 }
 } // namespace
 

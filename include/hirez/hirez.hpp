@@ -1,5 +1,6 @@
 #pragma once
 #include "hirez/objects.hpp"
+#include "hirez/objects_json.hpp"
 #include "hirez/util.hpp"
 
 #include <algorithm>
@@ -100,7 +101,7 @@ struct session {
 
 	std::wstring timestamp() const {
 		using namespace std::chrono;
-		auto time = floor<seconds>(system_clock::now());
+		date::sys_seconds time = floor<seconds>(system_clock::now());
 		return to_wstring(date::format("%Y%m%d%H%M%S", time));
 	}
 
@@ -175,6 +176,12 @@ struct session {
 
 	// /getfriends[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Returns the Smite User names of each of the player’s friends.  [PC only]
+	std::string getfriends(const std::string& player) {
+		return nlohmann::json::parse(
+				call(L"getfriends", wdev_id(), signature(L"getfriends"),
+						wsession_id(), timestamp(), to_wstring(player)))
+				.dump(4);
+	}
 
 	// /getgodranks[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Returns the Rank and Worshippers value for each God a player has played.
