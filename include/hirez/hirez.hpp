@@ -24,12 +24,6 @@ constexpr std::array<std::wstring_view, 7> game_uris{
 	L"http://api.ps4.paladins.com/paladinsapi.svc",
 	L"",
 };
-
-constexpr std::array<std::wstring_view, 3> response_strs{
-	L"json",
-	L"xml",
-	L"",
-};
 } // namespace detail
 
 enum class game_e : size_t {
@@ -42,17 +36,22 @@ enum class game_e : size_t {
 	none,
 };
 
-enum class response_e : size_t {
-	json,
-	xml,
-	none,
+enum class language_e : int {
+	english = 1,
+	german = 2,
+	french = 3,
+	chinese = 5,
+	spanish = 7,
+	spanish_latin_america = 9,
+	portuguese = 10,
+	russian = 11,
+	polish = 12,
+	turkish = 13,
 };
 
-template <response_e RespFmt = response_e::json,
-		game_e EndPointFmt = game_e::paladins_pc>
+template <game_e EndPointFmt = game_e::paladins_pc>
 struct session {
-	const wchar_t* response
-			= detail::response_strs[static_cast<size_t>(RespFmt)].data();
+	const wchar_t* response = L"json";
 	const wchar_t* game_url
 			= detail::game_uris[static_cast<size_t>(EndPointFmt)].data();
 
@@ -99,6 +98,15 @@ struct session {
 		return to_string(ret);
 	}
 
+	// /cmd[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{...}/{...}
+	template <class... Ts>
+	std::string session_call(const std::wstring& cmd, Ts&&... args) {
+		static_assert((std::is_same_v<std::wstring, std::decay_t<Ts>> && ...),
+				"arguments must be std::wstring");
+		return call(cmd, wdev_id(), signature(cmd), wsession_id(), timestamp(),
+				std::forward<Ts>(args)...);
+	}
+
 	std::wstring timestamp() const {
 		using namespace std::chrono;
 		date::sys_seconds time = floor<seconds>(system_clock::now());
@@ -124,25 +132,21 @@ struct session {
 	// A required step to Authenticate the developerId/signature for further API
 	// use.
 	session_response createsession() {
-		session_info = nlohmann::json::parse(call(L"createsession", wdev_id(),
-				signature(L"createsession"), timestamp()));
+		session_info = nlohmann::json::parse(session_call(L"createsession"));
 		return session_info;
 	}
 
 	// /testsession[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// A means of validating that a session is established.
 	std::string testsession() {
-		return call(L"testsession", wdev_id(), signature(L"testsession"),
-				wsession_id(), timestamp());
+		return session_call(L"testsession");
 	}
 
 	// /gethirezserverstatus[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
 	// Function returns UP/DOWN status for the primary game/platform
 	// environments.  Data is cached once a minute.
 	std::vector<server_status> gethirezserverstatus() {
-		return nlohmann::json::parse(call(L"gethirezserverstatus", wdev_id(),
-				signature(L"gethirezserverstatus"), wsession_id(),
-				timestamp()));
+		return nlohmann::json::parse(session_call(L"gethirezserverstatus"));
 	}
 
 	// APIs
@@ -151,8 +155,7 @@ struct session {
 	// Returns API Developer daily usage limits and the current status against
 	// those limits.
 	std::vector<data_used> getdataused() {
-		return nlohmann::json::parse(call(L"getdataused", wdev_id(),
-				signature(L"getdataused"), wsession_id(), timestamp()));
+		return nlohmann::json::parse(session_call(L"getdataused"));
 	}
 
 	// /getdemodetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
@@ -160,8 +163,7 @@ struct session {
 	// getmatchdetails().
 	std::vector<demo_details> getdemodetails(int match_id) {
 		return nlohmann::json::parse(
-				call(L"getdemodetails", wdev_id(), signature(L"getdemodetails"),
-						wsession_id(), timestamp(), std::to_wstring(match_id)));
+				session_call(L"getdemodetails", std::to_wstring(match_id)));
 	}
 
 	// /getesportsproleaguedetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
@@ -169,61 +171,111 @@ struct session {
 	// Pro League season.  An important return value is “match_status” which
 	// represents a match being scheduled (1), in-progress (2), or complete (3)
 	std::vector<esports_pro_league_details> getesportsproleaguedetails() {
-		return nlohmann::json::parse(call(L"getesportsproleaguedetails",
-				wdev_id(), signature(L"getesportsproleaguedetails"),
-				wsession_id(), timestamp()));
+		return nlohmann::json::parse(
+				session_call(L"getesportsproleaguedetails"));
 	}
 
 	// /getfriends[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Returns the Smite User names of each of the player’s friends.  [PC only]
-	std::string getfriends(const std::string& player) {
+	std::vector<friends> getfriends(const std::string& player) {
+		static_assert(EndPointFmt == game_e::paladins_pc
+						|| EndPointFmt == game_e::smite_pc,
+				"getfriends only works on PC end-points");
 		return nlohmann::json::parse(
-				call(L"getfriends", wdev_id(), signature(L"getfriends"),
-						wsession_id(), timestamp(), to_wstring(player)))
-				.dump(4);
+				session_call(L"getfriends", to_wstring(player)));
 	}
 
 	// /getgodranks[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Returns the Rank and Worshippers value for each God a player has played.
+	std::vector<god_rank> getgodranks(const std::string& player) {
+		return nlohmann::json::parse(
+				session_call(L"getgodranks", to_wstring(player)));
+	}
 
 	// /getchampionranks[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{player}
 	// Returns the Rank and Worshippers value for each Champion a player has
 	// played. [PaladinsAPI only]
+	std::vector<champion_rank> getchampionranks(const std::string& player) {
+		static_assert(EndPointFmt == game_e::paladins_pc
+						|| EndPointFmt == game_e::paladins_ps4
+						|| EndPointFmt == game_e::paladins_xbox,
+				"getchampionranks only works on Paladins end-points");
+		return nlohmann::json::parse(
+				session_call(L"getchampionranks", to_wstring(player)));
+	}
 
 	// /getgods[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{languageCode}
 	// Returns all Gods and their various attributes.
+	std::vector<god> getgods(language_e language) {
+		return nlohmann::json::parse(session_call(
+				L"getgods", std::to_wstring(static_cast<int>(language))));
+	}
 
 	// /getchampions[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{languageCode}
-	// Returns all Champions and their various attributes. [PaladinsAPI only]
+	// Returns all Champions and their various attributes. [PaladinsAPI
+	// only]
 
 	// /getgodleaderboard[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{queue}
-	// Returns the current season’s leaderboard for a god/queue combination.
-	// [SmiteAPI only; queues 440, 450, 451 only]
+	// Returns the current season’s leaderboard for a god/queue
+	// combination. [SmiteAPI only; queues 440, 450, 451 only]
 
 	// /getgodskins[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{languageCode}
 	// Returns all available skins for a particular God.
 
 	// /getchampionskins[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{languageCode}
-	// Returns all available skins for a particular Champion. [PaladinsAPI only]
+	// Returns all available skins for a particular
+	// Champion. [PaladinsAPI only]
 
 	// /getgodrecommendeditems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godid}/{languageCode}
-	// Returns the Recommended Items for a particular God.  [SmiteAPI only]
+	// Returns the Recommended Items for a
+	// particular God.  [SmiteAPI only]
 
 	// /getchampionecommendeditems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godid}/{languageCode}
-	// Returns the Recommended Items for a particular Champion. [PaladinsAPI
-	// only; Osbsolete - no data returned]
+	// Returns the Recommended Items for
+	// a particular Champion.
+	// [PaladinsAPI only; Osbsolete - no
+	// data returned]
 
 	// /getitems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{languagecode}
-	// Returns all Items and their various attributes.
+	// Returns all Items and
+	// their various attributes.
 
 	// /getmatchdetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
-	// Returns the statistics for a particular completed match.
+	// Returns the
+	// statistics for a
+	// particular
+	// completed match.
 
 	// /getmatchdetailsbatch[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id,match_id,match_id,...match_id}
-	// Returns the statistics for a particular set of completed matches.  NOTE:
-	// There is a byte imit to the amount of data returned; please limit the CSV
-	// parameter to 5 to 10 matches because of this and for Hi-Rez DB
-	// Performance reasons.
+	// Returns
+	// the
+	// statistics
+	// for a
+	// particular
+	// set of
+	// completed
+	// matches.
+	// NOTE:
+	// There is
+	// a byte
+	// imit to
+	// the
+	// amount of
+	// data
+	// returned;
+	// please
+	// limit the
+	// CSV
+	// parameter
+	// to 5 to
+	// 10
+	// matches
+	// because
+	// of this
+	// and for
+	// Hi-Rez DB
+	// Performance
+	// reasons.
 
 	// /getmatchplayerdetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
 	// Returns player information for a live match.

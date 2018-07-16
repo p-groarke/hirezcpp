@@ -151,4 +151,91 @@ struct friends {
 	int player_id{ 0 };
 	std::string ret_msg{ "" };
 };
+
+struct god_rank {
+	int Assists{ 0 };
+	int Deaths{ 0 };
+	int Gold{ 0 };
+	int Kills{ 0 };
+	date::sys_seconds LastPlayed{};
+	int Losses{ 0 };
+	int MinionKills{ 0 };
+	int Minutes{ 0 };
+	int Rank{ 0 };
+	int Wins{ 0 };
+	int Worshippers{ 0 };
+	std::string champion{ "" };
+	int champion_id{ 0 };
+	int player_id{ 0 };
+	std::string ret_msg{ "" };
+};
+
+struct champion_rank {
+	int Assists{ 0 };
+	int Deaths{ 0 };
+	int Gold{ 0 };
+	int Kills{ 0 };
+	date::sys_seconds LastPlayed{};
+	int Losses{ 0 };
+	int MinionKills{ 0 };
+	int Minutes{ 0 };
+	int Rank{ 0 };
+	int Wins{ 0 };
+	int Worshippers{ 0 };
+	std::string champion{ "" };
+	int champion_id{ 0 };
+	int player_id{ 0 };
+	std::string ret_msg{ "" };
+};
+
+struct ability_details {
+	std::string Description{ "" };
+	int Id{ 0 };
+	std::string Summary{ "" };
+	std::string URL{ "" };
+};
+
+struct god {
+	std::string Ability1{ "" };
+	std::string Ability2{ "" };
+	std::string Ability3{ "" };
+	std::string Ability4{ "" };
+	std::string Ability5{ "" };
+	int AbilityId1{ 0 };
+	int AbilityId2{ 0 };
+	int AbilityId3{ 0 };
+	int AbilityId4{ 0 };
+	int AbilityId5{ 0 };
+	ability_details Ability_1{};
+	ability_details Ability_2{};
+	ability_details Ability_3{};
+	ability_details Ability_4{};
+	ability_details Ability_5{};
+	std::string ChampionAbility1_URL{ "" };
+	std::string ChampionAbility2_URL{ "" };
+	std::string ChampionAbility3_URL{ "" };
+	std::string ChampionAbility4_URL{ "" };
+	std::string ChampionAbility5_URL{ "" };
+	std::string ChampionCard_URL{ "" };
+	std::string ChampionIcon_URL{ "" };
+	std::string Cons{ "" };
+	int Health{ 0 };
+	std::string Lore{ "" };
+	std::string Name{ "" };
+	std::string OnFreeRotation{ "" };
+	std::string Pantheon{ "" };
+	std::string Pros{ "" };
+	std::string Roles{ "" };
+	int Speed{ 0 };
+	std::string Title{ "" };
+	std::string Type{ "" };
+	std::string abilityDescription1{ "" };
+	std::string abilityDescription2{ "" };
+	std::string abilityDescription3{ "" };
+	std::string abilityDescription4{ "" };
+	std::string abilityDescription5{ "" };
+	int id{ 0 };
+	std::string latestChampion{ "" };
+	std::string ret_msg{ "" };
+};
 } // namespace rez

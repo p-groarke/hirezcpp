@@ -30,46 +30,71 @@ TEST(paladins_pc, everything) {
 	rez::session_response createsesh_result = sesh.createsession();
 	f = createsesh_result.ret_msg.find("Approved");
 	EXPECT_NE(f, std::string::npos);
+	EXPECT_NE(createsesh_result.timestamp, date::sys_seconds{});
 	nlohmann::json j = createsesh_result;
 	printf("createsession response : %s\n\n", j.dump(4).c_str());
 
-	str = sesh.testsession();
-	f = str.find(
-			"This was a successful test with the following parameters added:");
-	EXPECT_NE(f, std::string::npos);
-	printf("testsession response : %s\n\n", str.c_str());
+	// str = sesh.testsession();
+	// f = str.find(
+	//		"This was a successful test with the following parameters added:");
+	// EXPECT_NE(f, std::string::npos);
+	// printf("testsession response : %s\n\n", str.c_str());
 
-	std::vector<rez::server_status> server_stats = sesh.gethirezserverstatus();
-	ASSERT_GT(server_stats.size(), 0);
-	EXPECT_EQ(server_stats[0].status, "UP");
-	j = server_stats;
-	printf("getserverstatus response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::server_status> server_stats =
+	// sesh.gethirezserverstatus(); ASSERT_GT(server_stats.size(), 0);
+	// EXPECT_EQ(server_stats[0].status, "UP");
+	// EXPECT_NE(server_stats[0].entry_datetime, date::sys_seconds{});
+	// j = server_stats;
+	// printf("getserverstatus response : %s\n\n", j.dump(4).c_str());
 
-	std::vector<rez::data_used> dus = sesh.getdataused();
-	EXPECT_GT(dus.size(), 0);
-	j = dus;
-	printf("getdataused response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::data_used> dus = sesh.getdataused();
+	// EXPECT_GT(dus.size(), 0);
+	// j = dus;
+	// printf("getdataused response : %s\n\n", j.dump(4).c_str());
 
-	std::vector<rez::match_history> mhs = sesh.getmatchhistory("socapex");
-	EXPECT_GT(mhs.size(), 0);
-	EXPECT_EQ(mhs[0].playerName, "socapex");
-	j = mhs[0];
-	printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::match_history> mhs = sesh.getmatchhistory("socapex");
+	// EXPECT_GT(mhs.size(), 0);
+	// EXPECT_EQ(mhs[0].playerName, "socapex");
+	// EXPECT_NE(mhs[0].Match_Time, date::sys_seconds{});
+	// j = mhs[0];
+	// printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
 
-	std::vector<rez::demo_details> dds = sesh.getdemodetails(mhs[0].Match);
-	EXPECT_GT(dds.size(), 0);
-	EXPECT_EQ(dds[0].Match, mhs[0].Match);
-	j = dds[0];
-	printf("getdemodetails response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::demo_details> dds = sesh.getdemodetails(mhs[0].Match);
+	// EXPECT_GT(dds.size(), 0);
+	// EXPECT_EQ(dds[0].Match, mhs[0].Match);
+	// EXPECT_NE(dds[0].Entry_Datetime, date::sys_seconds{});
+	// j = dds[0];
+	// printf("getdemodetails response : %s\n\n", j.dump(4).c_str());
 
-	std::vector<rez::esports_pro_league_details> eplds
-			= sesh.getesportsproleaguedetails();
-	EXPECT_GT(eplds.size(), 0);
-	j = eplds[0];
-	printf("getesportsproleaguedetails response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::esports_pro_league_details> eplds
+	//		= sesh.getesportsproleaguedetails();
+	// EXPECT_GT(eplds.size(), 0);
+	// EXPECT_NE(eplds[0].match_date, date::sys_seconds{});
+	// j = eplds[0];
+	// printf("getesportsproleaguedetails response : %s\n\n",
+	// j.dump(4).c_str());
 
-	// str = sesh.getfriends("socapex");
-	// printf("getfriends response : %s\n\n", str.c_str());
+	// std::vector<rez::friends> fs = sesh.getfriends("socapex");
+	// EXPECT_GT(fs.size(), 0);
+	// j = fs[0];
+	// printf("getfriends response : %s\n\n", j.dump(4).c_str());
+
+	// std::vector<rez::god_rank> grs = sesh.getgodranks("socapex");
+	// EXPECT_GT(grs.size(), 0);
+	// EXPECT_NE(grs[0].LastPlayed, date::sys_seconds{});
+	// j = grs[0];
+	// printf("getgodranks response : %s\n\n", j.dump(4).c_str());
+
+	// std::vector<rez::champion_rank> crs = sesh.getchampionranks("socapex");
+	// EXPECT_GT(crs.size(), 0);
+	// EXPECT_NE(crs[0].LastPlayed, date::sys_seconds{});
+	// j = crs[0];
+	// printf("getchampionranks response : %s\n\n", j.dump(4).c_str());
+
+	// std::vector<rez::god> gs = sesh.getgods(rez::language_e::english);
+	// EXPECT_GT(gs.size(), 0);
+	// j = gs[0];
+	// printf("getgods response : %s\n\n", j.dump(4).c_str());
 }
 } // namespace
 

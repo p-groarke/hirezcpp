@@ -9,25 +9,25 @@ void to_json(nlohmann::json& j, const session_response& obj) {
 	j = {
 		REZ_TO_J(obj, ret_msg),
 		REZ_TO_J(obj, session_id),
-		REZ_TO_DATE(obj, timestamp),
+		REZ_TO_J(obj, timestamp),
 	};
 }
 void from_json(const nlohmann::json& j, session_response& obj) {
 	REZ_FROM_J(obj, ret_msg, j);
 	REZ_FROM_J(obj, session_id, j);
-	REZ_FROM_DATE(obj, timestamp, j);
+	REZ_FROM_J(obj, timestamp, j);
 }
 
 void to_json(nlohmann::json& j, const server_status& obj) {
 	j = {
-		REZ_TO_DATE(obj, entry_datetime),
+		REZ_TO_J(obj, entry_datetime),
 		REZ_TO_J(obj, ret_msg),
 		REZ_TO_J(obj, status),
 		REZ_TO_J(obj, version),
 	};
 }
 void from_json(const nlohmann::json& j, server_status& obj) {
-	REZ_FROM_DATE2(obj, entry_datetime, j);
+	REZ_FROM_J(obj, entry_datetime, j);
 	REZ_FROM_J(obj, ret_msg, j);
 	REZ_FROM_J(obj, status, j);
 	REZ_FROM_J(obj, version, j);
@@ -112,7 +112,7 @@ void to_json(nlohmann::json& j, const match_history& obj) {
 		REZ_TO_J(obj, Map_Game),
 		REZ_TO_J(obj, Match),
 		REZ_TO_J(obj, Match_Queue_Id),
-		REZ_TO_DATE(obj, Match_Time),
+		REZ_TO_J(obj, Match_Time),
 		REZ_TO_J(obj, Minutes),
 		REZ_TO_J(obj, Multi_kill_Max),
 		REZ_TO_J(obj, Objective_Assists),
@@ -187,7 +187,7 @@ void from_json(const nlohmann::json& j, match_history& obj) {
 	REZ_FROM_J(obj, Map_Game, j);
 	REZ_FROM_J(obj, Match, j);
 	REZ_FROM_J(obj, Match_Queue_Id, j);
-	REZ_FROM_DATE(obj, Match_Time, j);
+	REZ_FROM_J(obj, Match_Time, j);
 	REZ_FROM_J(obj, Minutes, j);
 	REZ_FROM_J(obj, Multi_kill_Max, j);
 	REZ_FROM_J(obj, Objective_Assists, j);
@@ -213,14 +213,14 @@ void to_json(nlohmann::json& j, const demo_details& obj) {
 		REZ_TO_J(obj, BanId2),
 		REZ_TO_J(obj, BanId3),
 		REZ_TO_J(obj, BanId4),
-		REZ_TO_DATE(obj, Entry_Datetime),
+		REZ_TO_J(obj, Entry_Datetime),
 		REZ_TO_J(obj, Match),
 		REZ_TO_J(obj, Match_Time),
 		REZ_TO_J(obj, Offline_Spectators),
 		REZ_TO_J(obj, Queue),
 		REZ_TO_J(obj, Realtime_Spectators),
-		REZ_TO_DATE(obj, Recording_Ended),
-		REZ_TO_DATE(obj, Recording_Started),
+		REZ_TO_J(obj, Recording_Ended),
+		REZ_TO_J(obj, Recording_Started),
 		REZ_TO_J(obj, Team1_AvgLevel),
 		REZ_TO_J(obj, Team1_Gold),
 		REZ_TO_J(obj, Team1_Kills),
@@ -238,14 +238,14 @@ void from_json(const nlohmann::json& j, demo_details& obj) {
 	REZ_FROM_J(obj, BanId2, j);
 	REZ_FROM_J(obj, BanId3, j);
 	REZ_FROM_J(obj, BanId4, j);
-	REZ_FROM_DATE(obj, Entry_Datetime, j);
+	REZ_FROM_J(obj, Entry_Datetime, j);
 	REZ_FROM_J(obj, Match, j);
 	REZ_FROM_J(obj, Match_Time, j);
 	REZ_FROM_J(obj, Offline_Spectators, j);
 	REZ_FROM_J(obj, Queue, j);
 	REZ_FROM_J(obj, Realtime_Spectators, j);
-	REZ_FROM_DATE(obj, Recording_Ended, j);
-	REZ_FROM_DATE(obj, Recording_Started, j);
+	REZ_FROM_J(obj, Recording_Ended, j);
+	REZ_FROM_J(obj, Recording_Started, j);
 	REZ_FROM_J(obj, Team1_AvgLevel, j);
 	REZ_FROM_J(obj, Team1_Gold, j);
 	REZ_FROM_J(obj, Team1_Kills, j);
@@ -267,7 +267,7 @@ void to_json(nlohmann::json& j, const esports_pro_league_details& obj) {
 		REZ_TO_J(obj, home_team_name),
 		REZ_TO_J(obj, home_team_tagname),
 		REZ_TO_J(obj, map_instance_id),
-		REZ_TO_DATE(obj, match_date),
+		REZ_TO_J(obj, match_date),
 		REZ_TO_J(obj, match_number),
 		REZ_TO_J(obj, match_status),
 		REZ_TO_J(obj, matchup_id),
@@ -285,7 +285,7 @@ void from_json(const nlohmann::json& j, esports_pro_league_details& obj) {
 	REZ_FROM_J(obj, home_team_name, j);
 	REZ_FROM_J(obj, home_team_tagname, j);
 	REZ_FROM_J(obj, map_instance_id, j);
-	REZ_FROM_DATE(obj, match_date, j);
+	REZ_FROM_J(obj, match_date, j);
 	REZ_FROM_J(obj, match_number, j);
 	REZ_FROM_J(obj, match_status, j);
 	REZ_FROM_J(obj, matchup_id, j);
@@ -307,6 +307,183 @@ void from_json(const nlohmann::json& j, friends& obj) {
 	REZ_FROM_J(obj, account_id, j);
 	REZ_FROM_J(obj, name, j);
 	REZ_FROM_J(obj, player_id, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const god_rank& obj) {
+	j = {
+		REZ_TO_J(obj, Assists),
+		REZ_TO_J(obj, Deaths),
+		REZ_TO_J(obj, Gold),
+		REZ_TO_J(obj, Kills),
+		REZ_TO_J(obj, LastPlayed),
+		REZ_TO_J(obj, Losses),
+		REZ_TO_J(obj, MinionKills),
+		REZ_TO_J(obj, Minutes),
+		REZ_TO_J(obj, Rank),
+		REZ_TO_J(obj, Wins),
+		REZ_TO_J(obj, Worshippers),
+		REZ_TO_J(obj, champion),
+		REZ_TO_J(obj, champion_id),
+		REZ_TO_J(obj, player_id),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, god_rank& obj) {
+	REZ_FROM_J(obj, Assists, j);
+	REZ_FROM_J(obj, Deaths, j);
+	REZ_FROM_J(obj, Gold, j);
+	REZ_FROM_J(obj, Kills, j);
+	REZ_FROM_J(obj, LastPlayed, j);
+	REZ_FROM_J(obj, Losses, j);
+	REZ_FROM_J(obj, MinionKills, j);
+	REZ_FROM_J(obj, Minutes, j);
+	REZ_FROM_J(obj, Rank, j);
+	REZ_FROM_J(obj, Wins, j);
+	REZ_FROM_J(obj, Worshippers, j);
+	REZ_FROM_J(obj, champion, j);
+	REZ_FROM_J(obj, champion_id, j);
+	REZ_FROM_J(obj, player_id, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+void to_json(nlohmann::json& j, const champion_rank& obj) {
+	j = {
+		REZ_TO_J(obj, Assists),
+		REZ_TO_J(obj, Deaths),
+		REZ_TO_J(obj, Gold),
+		REZ_TO_J(obj, Kills),
+		REZ_TO_J(obj, LastPlayed),
+		REZ_TO_J(obj, Losses),
+		REZ_TO_J(obj, MinionKills),
+		REZ_TO_J(obj, Minutes),
+		REZ_TO_J(obj, Rank),
+		REZ_TO_J(obj, Wins),
+		REZ_TO_J(obj, Worshippers),
+		REZ_TO_J(obj, champion),
+		REZ_TO_J(obj, champion_id),
+		REZ_TO_J(obj, player_id),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, champion_rank& obj) {
+	REZ_FROM_J(obj, Assists, j);
+	REZ_FROM_J(obj, Deaths, j);
+	REZ_FROM_J(obj, Gold, j);
+	REZ_FROM_J(obj, Kills, j);
+	REZ_FROM_J(obj, LastPlayed, j);
+	REZ_FROM_J(obj, Losses, j);
+	REZ_FROM_J(obj, MinionKills, j);
+	REZ_FROM_J(obj, Minutes, j);
+	REZ_FROM_J(obj, Rank, j);
+	REZ_FROM_J(obj, Wins, j);
+	REZ_FROM_J(obj, Worshippers, j);
+	REZ_FROM_J(obj, champion, j);
+	REZ_FROM_J(obj, champion_id, j);
+	REZ_FROM_J(obj, player_id, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const ability_details& obj) {
+	j = {
+		REZ_TO_J(obj, Description),
+		REZ_TO_J(obj, Id),
+		REZ_TO_J(obj, Summary),
+		REZ_TO_J(obj, URL),
+	};
+}
+void from_json(const nlohmann::json& j, ability_details& obj) {
+	REZ_FROM_J(obj, Description, j);
+	REZ_FROM_J(obj, Id, j);
+	REZ_FROM_J(obj, Summary, j);
+	REZ_FROM_J(obj, URL, j);
+}
+
+void to_json(nlohmann::json& j, const god& obj) {
+	j = {
+		REZ_TO_J(obj, Ability1),
+		REZ_TO_J(obj, Ability2),
+		REZ_TO_J(obj, Ability3),
+		REZ_TO_J(obj, Ability4),
+		REZ_TO_J(obj, Ability5),
+		REZ_TO_J(obj, AbilityId1),
+		REZ_TO_J(obj, AbilityId2),
+		REZ_TO_J(obj, AbilityId3),
+		REZ_TO_J(obj, AbilityId4),
+		REZ_TO_J(obj, AbilityId5),
+		REZ_TO_J(obj, Ability_1),
+		REZ_TO_J(obj, Ability_2),
+		REZ_TO_J(obj, Ability_3),
+		REZ_TO_J(obj, Ability_4),
+		REZ_TO_J(obj, Ability_5),
+		REZ_TO_J(obj, ChampionAbility1_URL),
+		REZ_TO_J(obj, ChampionAbility2_URL),
+		REZ_TO_J(obj, ChampionAbility3_URL),
+		REZ_TO_J(obj, ChampionAbility4_URL),
+		REZ_TO_J(obj, ChampionAbility5_URL),
+		REZ_TO_J(obj, ChampionCard_URL),
+		REZ_TO_J(obj, ChampionIcon_URL),
+		REZ_TO_J(obj, Cons),
+		REZ_TO_J(obj, Health),
+		REZ_TO_J(obj, Lore),
+		REZ_TO_J(obj, Name),
+		REZ_TO_J(obj, OnFreeRotation),
+		REZ_TO_J(obj, Pantheon),
+		REZ_TO_J(obj, Pros),
+		REZ_TO_J(obj, Roles),
+		REZ_TO_J(obj, Speed),
+		REZ_TO_J(obj, Title),
+		REZ_TO_J(obj, Type),
+		REZ_TO_J(obj, abilityDescription1),
+		REZ_TO_J(obj, abilityDescription2),
+		REZ_TO_J(obj, abilityDescription3),
+		REZ_TO_J(obj, abilityDescription4),
+		REZ_TO_J(obj, abilityDescription5),
+		REZ_TO_J(obj, id),
+		REZ_TO_J(obj, latestChampion),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, god& obj) {
+	REZ_FROM_J(obj, Ability1, j);
+	REZ_FROM_J(obj, Ability2, j);
+	REZ_FROM_J(obj, Ability3, j);
+	REZ_FROM_J(obj, Ability4, j);
+	REZ_FROM_J(obj, Ability5, j);
+	REZ_FROM_J(obj, AbilityId1, j);
+	REZ_FROM_J(obj, AbilityId2, j);
+	REZ_FROM_J(obj, AbilityId3, j);
+	REZ_FROM_J(obj, AbilityId4, j);
+	REZ_FROM_J(obj, AbilityId5, j);
+	REZ_FROM_J(obj, Ability_1, j);
+	REZ_FROM_J(obj, Ability_2, j);
+	REZ_FROM_J(obj, Ability_3, j);
+	REZ_FROM_J(obj, Ability_4, j);
+	REZ_FROM_J(obj, Ability_5, j);
+	REZ_FROM_J(obj, ChampionAbility1_URL, j);
+	REZ_FROM_J(obj, ChampionAbility2_URL, j);
+	REZ_FROM_J(obj, ChampionAbility3_URL, j);
+	REZ_FROM_J(obj, ChampionAbility4_URL, j);
+	REZ_FROM_J(obj, ChampionAbility5_URL, j);
+	REZ_FROM_J(obj, ChampionCard_URL, j);
+	REZ_FROM_J(obj, ChampionIcon_URL, j);
+	REZ_FROM_J(obj, Cons, j);
+	REZ_FROM_J(obj, Health, j);
+	REZ_FROM_J(obj, Lore, j);
+	REZ_FROM_J(obj, Name, j);
+	REZ_FROM_J(obj, OnFreeRotation, j);
+	REZ_FROM_J(obj, Pantheon, j);
+	REZ_FROM_J(obj, Pros, j);
+	REZ_FROM_J(obj, Roles, j);
+	REZ_FROM_J(obj, Speed, j);
+	REZ_FROM_J(obj, Title, j);
+	REZ_FROM_J(obj, Type, j);
+	REZ_FROM_J(obj, abilityDescription1, j);
+	REZ_FROM_J(obj, abilityDescription2, j);
+	REZ_FROM_J(obj, abilityDescription3, j);
+	REZ_FROM_J(obj, abilityDescription4, j);
+	REZ_FROM_J(obj, abilityDescription5, j);
+	REZ_FROM_J(obj, id, j);
+	REZ_FROM_J(obj, latestChampion, j);
 	REZ_FROM_J(obj, ret_msg, j);
 }
 } // namespace rez

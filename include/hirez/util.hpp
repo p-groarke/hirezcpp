@@ -9,47 +9,16 @@
 
 #define REZ_TO_J(obj, x) \
 	{ #x, obj.x }
-#define REZ_TO_DATE(obj, x) \
-	{ #x, rez::detail::date_to_j(obj.x) }
 
 #define REZ_FROM_J(obj, x, j) rez::detail::get_v(j, #x, obj.x)
-#define REZ_FROM_DATE(obj, x, j) obj.x = rez::detail::date_from_j(j, #x)
-#define REZ_FROM_DATE2(obj, x, j) obj.x = rez::detail::date_from_j(j, #x, 2)
 
 namespace rez {
 namespace detail {
 inline const char* date_format = "%m/%d/%Y %T %p";
 inline const char* date_format2 = "%Y-%m-%d  %T";
 
-inline std::string date_to_j(const date::sys_seconds& s) {
-	return date::format(date_format, s);
-}
-
-inline date::sys_seconds date_from_j(
-		const nlohmann::json& j, const char* key, int version = 1) {
-	if (j.at(key).is_null()) {
-		return {};
-	}
-	std::istringstream iss{ j.value(key, "") };
-	date::sys_seconds ret{};
-	try {
-		if (version == 1) {
-			iss >> date::parse(rez::detail::date_format, ret);
-		} else {
-			iss >> date::parse(rez::detail::date_format2, ret);
-		}
-	} catch (const std::exception& e) {
-		fprintf(stderr, "%s\n", e.what());
-	}
-	return ret;
-}
-
 template <class T>
 inline void get_v(const nlohmann::json& j, const char* key, T& val) {
-	static_assert((std::is_same_v<std::string, std::decay_t<T>>)
-					|| (std::is_same_v<int, std::decay_t<T>>),
-			"get_v : unsupported type conversion");
-
 	if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
 		if (j.at(key).is_null()) {
 			val = "";
@@ -58,13 +27,19 @@ inline void get_v(const nlohmann::json& j, const char* key, T& val) {
 		} else {
 			val = j.value(key, "");
 		}
-	} else if (std::is_same_v<int, std::decay_t<T>>) {
+	} else if constexpr (std::is_same_v<int, std::decay_t<T>>) {
 		if (j.at(key).is_null()) {
 			val = 0;
 		} else if (j.at(key).is_string()) {
 			val = std::stoi(j.value(key, "0"));
 		} else {
 			val = j.value(key, 0);
+		}
+	} else {
+		if (j.at(key).is_null()) {
+			val = T{};
+		} else {
+			val = j.value(key, T{});
 		}
 	}
 }
@@ -80,3 +55,30 @@ inline std::string to_string(const std::wstring& str) {
 	return converter.to_bytes(str);
 }
 } // namespace rez
+
+namespace nlohmann {
+template <>
+struct adl_serializer<date::sys_seconds> {
+	static void to_json(json& j, const date::sys_seconds& s) {
+		j = date::format(rez::detail::date_format, s);
+	}
+
+	static void from_json(const json& j, date::sys_seconds& s) {
+		if (!j.is_string()) {
+			s = {};
+			return;
+		}
+
+		std::istringstream iss{ j.get<std::string>() };
+		try {
+			iss >> date::parse(rez::detail::date_format, s);
+			if (s == date::sys_seconds{}) {
+				iss = std::istringstream{ j.get<std::string>() };
+				iss >> date::parse(rez::detail::date_format2, s);
+			}
+		} catch (const std::exception& e) {
+			fprintf(stderr, "%s\n", e.what());
+		}
+	}
+};
+} // namespace nlohmann
