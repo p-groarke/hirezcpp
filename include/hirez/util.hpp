@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <codecvt>
 #include <date/date.h>
 #include <locale>
@@ -14,7 +15,7 @@
 
 namespace rez {
 namespace detail {
-inline const char* date_format = "%m/%d/%Y %T %p";
+inline const char* date_format = "%m/%d/%Y %I:%M:%S%p";
 inline const char* date_format2 = "%Y-%m-%d  %T";
 
 template <class T>
@@ -69,11 +70,22 @@ struct adl_serializer<date::sys_seconds> {
 			return;
 		}
 
-		std::istringstream iss{ j.get<std::string>() };
+		std::string time = j.get<std::string>();
+		size_t off = time.find(" PM");
+		if (off != std::string::npos) {
+			time.replace(off, 1, "");
+		}
+		off = time.find(" AM");
+		if (off != std::string::npos) {
+			time.replace(off, 1, "");
+		}
+		// printf("\nTIME %s\n", time.c_str());
+
+		std::istringstream iss{ time };
 		try {
 			iss >> date::parse(rez::detail::date_format, s);
 			if (s == date::sys_seconds{}) {
-				iss = std::istringstream{ j.get<std::string>() };
+				iss = std::istringstream{ time };
 				iss >> date::parse(rez::detail::date_format2, s);
 			}
 		} catch (const std::exception& e) {
