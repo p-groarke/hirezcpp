@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cpprest/http_client.h>
 #include <cpprest/uri.h>
@@ -26,6 +27,7 @@ constexpr std::array<std::wstring_view, 7> game_uris{
 	L"http://api.ps4.paladins.com/paladinsapi.svc",
 	L"",
 };
+
 } // namespace detail
 
 enum class game_e : size_t {
@@ -38,6 +40,39 @@ enum class game_e : size_t {
 	none,
 };
 
+namespace detail {
+template <game_e T>
+struct queue_trait {
+	using type = queue_smi_e;
+};
+template <>
+struct queue_trait<game_e::smite_pc> {
+	using type = queue_smi_e;
+};
+template <>
+struct queue_trait<game_e::smite_ps4> {
+	using type = queue_smi_e;
+};
+template <>
+struct queue_trait<game_e::smite_xbox> {
+	using type = queue_smi_e;
+};
+template <>
+struct queue_trait<game_e::paladins_pc> {
+	using type = queue_pal_e;
+};
+template <>
+struct queue_trait<game_e::paladins_ps4> {
+	using type = queue_pal_e;
+};
+template <>
+struct queue_trait<game_e::paladins_xbox> {
+	using type = queue_pal_e;
+};
+template <game_e T>
+using queue_t = typename queue_trait<T>::type;
+} // namespace detail
+
 enum class language_e : int {
 	english = 1,
 	german = 2,
@@ -49,86 +84,7 @@ enum class language_e : int {
 	russian = 11,
 	polish = 12,
 	turkish = 13,
-};
-
-enum class queue_smi_e : int {
-	arena = 435,
-	joust = 448,
-	conquest = 426,
-	assault = 445,
-	clash = 466,
-	adventures_horde = 495,
-	conquest_ranked = 451,
-	motd = 434,
-	siege_4v4 = 459,
-	joust_3v3_ranked = 450,
-	joust_1v1_ranked = 440,
-	joust_challenge = 441,
-	arena_ai_easy = 457,
-	arena_ai_medium = 468,
-	basic_tutorial = 436,
-	arena_challenge = 438,
-	conquest_challenge = 429,
-	joust_3v3_training = 482,
-	arena_tutorial = 462,
-	arena_training = 483,
-	joust_ai_easy = 474,
-	joust_ai_medium = 456,
-	clash_ai_easy = 478,
-	clash_ai_medium = 469,
-	arena_practice_medium = 472,
-	assault_ai_easy = 481,
-	conquest_ai_easy = 476,
-	clash_tutorial = 471,
-	joust_practice_medium = 473,
-	assault_challenge = 446,
-	assault_ai_medium = 454,
-	arena_practice_easy = 443,
-	clash_challenge = 467,
-	conquest_ai_medium = 461,
-	joust_practice_easy = 464,
-	clash_practice_medium = 477,
-	siege_challenge = 460,
-	assault_practice_medium = 480,
-	conquest_tutorial = 463,
-	clash_practice_easy = 470,
-	assault_practice_easy = 479,
-	conquest_practice_medium = 475,
-	conquest_practice_easy = 458,
-	jungle_practice = 444,
-	jungle_practice_preselected = 496,
-};
-
-enum class queue_pal_e : int {
-	live_casual = 424,
-	live_team_deathmatch = 469,
-	live_onslaught = 452,
-	live_competitive = 428,
-	classic_siege = 465,
-	live_practice_siege = 425,
-	live_onslaught_practice = 453,
-	live_team_deathmatch_practice = 470,
-	live_test_maps = 445,
-	live_battlegrounds_solo = 474,
-	live_battlegrounds_duo = 475,
-	live_battlegrounds_quad = 476,
-	custom_t_magistrates_archives = 472,
-	custom_t_trade_district = 468,
-	custom_s_stonekeep = 423,
-	custom_t_foremans_rise = 471,
-	custom_s_frogisle = 433,
-	custom_s_fishmarket = 431,
-	custom_s_brightmarsh = 458,
-	custom_s_timbermill = 430,
-	custom_s_serpentbeach = 440,
-	custom_s_jaguarfalls = 438,
-	custom_s_splitstonequarry = 459,
-	custom_o_magistrates_archives = 464,
-	custom_s_frozenguard = 432,
-	custom_o_foremans_rise = 462,
-	custom_s_icemines = 439,
-	custom_o_primalcourt = 455,
-	custom_o_snowfalljunction = 454,
+	none = 0,
 };
 
 template <game_e EndPointFmt = game_e::paladins_pc>
@@ -136,15 +92,17 @@ struct session {
 	const wchar_t* response = L"json";
 	const wchar_t* game_url
 			= detail::game_uris[static_cast<size_t>(EndPointFmt)].data();
+
 	static constexpr bool paladins_api = EndPointFmt == game_e::paladins_pc
 			|| EndPointFmt == game_e::paladins_ps4
 			|| EndPointFmt == game_e::paladins_xbox;
 
-	template <class DevId, class AuthKey>
-	session(DevId&& _dev_id, AuthKey&& _auth_key,
+	using queue_t = typename detail::queue_t<EndPointFmt>;
+
+	session(const std::string& _dev_id, const std::string& _auth_key,
 			bool cache_session_to_disk = true)
-			: dev_id(std::forward<DevId>(_dev_id))
-			, auth_key(std::forward<AuthKey>(_auth_key))
+			: dev_id(_dev_id)
+			, auth_key(_auth_key)
 			, _http_client(game_url)
 			, _cache_session_to_disk(cache_session_to_disk) {
 		if (_cache_session_to_disk) {
@@ -342,14 +300,22 @@ struct session {
 	// /getgodleaderboard[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{queue}
 	// Returns the current season’s leaderboard for a god/queue combination.
 	// [SmiteAPI only; queues 440, 450, 451 only]
-	template <int Queue = 440>
-	std::vector<god_leaderboard> getgodleaderboard(int god_id) {
+	std::vector<god_leaderboard> getgodleaderboard(
+			int god_id, queue_smi_e queue) {
 		static_assert(!paladins_api,
 				"getgodleaderboard only works on Smite end-points");
-		static_assert(Queue == 440 || Queue == 450 || Queue == 451,
-				"getgodleaderboard queue must be 440, 450 or 451");
-		return nlohmann::json::parse(session_call(L"getgodleaderboard",
-				std::to_wstring(god_id), std::to_wstring(Queue)));
+
+		bool queue_ok = queue == queue_smi_e::joust_1v1_ranked
+				|| queue == queue_smi_e::joust_3v3_ranked
+				|| queue == queue_smi_e::conquest_ranked;
+		assert(queue_ok
+				&& "getgodleaderboard queue must be joust_1v1_ranked "
+				   "(440), joust_3v3_ranked (450) or conquest_ranked "
+				   "(451)");
+
+		return nlohmann::json::parse(
+				session_call(L"getgodleaderboard", std::to_wstring(god_id),
+						std::to_wstring(static_cast<int>(queue))));
 	}
 
 	// /getgodskins[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{languageCode}
@@ -511,6 +477,69 @@ struct session {
 	// times, specifying the following values for {hour}: “3,00”, “3,10”,
 	// “3,20”, “3,30”, “3,40”, “3,50”. The standard, full hour format of
 	// {hour} = “hh” is still supported.
+	std::vector<match_id> getmatchidsbyqueue(queue_t queue,
+			date::year_month_day date, int hour = -1, int minutes = -1) {
+		if (hour != -1) {
+			bool hour_ok = hour >= 0 && hour <= 23;
+			assert(hour_ok && "hour must be between 0 and 23");
+		} else {
+			assert(minutes == -1
+					&& "when requesting a full day, minutes must be -1 "
+					   "(default value)");
+		}
+
+		if (minutes != -1) {
+			bool minutes_ok = minutes == 0 || minutes == 10 || minutes == 20
+					|| minutes == 30 || minutes == 40 || minutes == 50;
+			assert(minutes_ok && "minutes must be 0, 10, 20, 30, 40 or 50");
+		}
+
+		const wchar_t* date_format = L"%Y%m%d";
+		std::wstring date_s = date::format(date_format, date);
+
+		auto get_minute = [&](int hour, int minute) {
+			std::wstring m = std::to_wstring(minute);
+			if (minute == 0) {
+				m = L"00";
+			}
+			std::wstring hm = std::to_wstring(hour) + L"," + m;
+
+			std::vector<match_id> ret = nlohmann::json::parse(session_call(
+					L"getmatchidsbyqueue",
+					std::to_wstring(static_cast<int>(queue)), date_s, hm));
+			return ret;
+		};
+
+		auto get_hour = [&](int hour) {
+			std::vector<match_id> ret{};
+			for (int i = 0; i < 60; i += 10) {
+				std::vector<match_id> v = get_minute(hour, i);
+				ret.insert(ret.end(), std::make_move_iterator(v.begin()),
+						std::make_move_iterator(v.end()));
+			}
+			return ret;
+		};
+
+		std::vector<match_id> ret{};
+		if (hour == -1) {
+			for (int i = 0; i < 24; ++i) {
+				std::vector<match_id> v = get_hour(i);
+				ret.insert(ret.end(), std::make_move_iterator(v.begin()),
+						std::make_move_iterator(v.end()));
+			}
+		} else {
+			if (minutes == -1) {
+				std::vector<match_id> v = get_hour(hour);
+				ret.insert(ret.end(), std::make_move_iterator(v.begin()),
+						std::make_move_iterator(v.end()));
+			} else {
+				std::vector<match_id> v = get_minute(hour, minutes);
+				ret.insert(ret.end(), std::make_move_iterator(v.begin()),
+						std::make_move_iterator(v.end()));
+			}
+		}
+		return ret;
+	}
 
 	// /getleagueleaderboard[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{queue}/{tier}/{season}
 	// Returns the top players for a particular league (as indicated by the

@@ -56,6 +56,23 @@ inline void get_v(const nlohmann::json& j, const char* key, T& val) {
 		} else {
 			val = j.value(key, 0.f);
 		}
+	} else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
+		if (key_found && j.at(key).is_null()) {
+			val = false;
+		} else if (key_found && j.at(key).is_string()) {
+			std::string s = j.value(key, "");
+			if (s == "y") {
+				val = true;
+			} else if (s == "n") {
+				val = false;
+			} else {
+				fprintf(stderr, "'%s' : bool flag '%s' unrecognized\n",
+						j.dump().c_str(), s.c_str());
+				val = false;
+			}
+		} else {
+			val = j.value(key, false);
+		}
 	} else {
 		if (key_found && j.at(key).is_null()) {
 			val = T{};
@@ -64,6 +81,7 @@ inline void get_v(const nlohmann::json& j, const char* key, T& val) {
 		}
 	}
 }
+
 } // namespace detail
 
 inline std::wstring to_wstring(const std::string& str) {

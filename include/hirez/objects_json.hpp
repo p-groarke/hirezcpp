@@ -5,11 +5,18 @@
 #include <nlohmann/json.hpp>
 
 namespace rez {
-void to_json(nlohmann::json& j, const nothing&) {
-	j = {};
+void to_json(nlohmann::json& j, const queue_smi_e& obj) {
+	j = static_cast<int>(obj);
 }
-void from_json(const nlohmann::json&, nothing& obj) {
-	obj = {};
+void from_json(const nlohmann::json& j, queue_smi_e& obj) {
+	obj = static_cast<queue_smi_e>(j.get<int>());
+}
+
+void to_json(nlohmann::json& j, const queue_pal_e& obj) {
+	j = static_cast<int>(obj);
+}
+void from_json(const nlohmann::json& j, queue_pal_e& obj) {
+	obj = static_cast<queue_pal_e>(j.get<int>());
 }
 
 void to_json(nlohmann::json& j, const session_info& obj) {
@@ -1547,6 +1554,19 @@ void from_json(const nlohmann::json& j, match_details_smi& obj) {
 	REZ_FROM_J(obj, name, j);
 	REZ_FROM_J(obj, playerId, j);
 	REZ_FROM_J(obj, playerName, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const match_id& obj) {
+	j = {
+		REZ_TO_J(obj, Active_Flag),
+		REZ_TO_J(obj, Match),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, match_id& obj) {
+	REZ_FROM_J(obj, Active_Flag, j);
+	REZ_FROM_J(obj, Match, j);
 	REZ_FROM_J(obj, ret_msg, j);
 }
 } // namespace rez

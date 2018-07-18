@@ -54,16 +54,16 @@ TEST(paladins_pc, everything) {
 	EXPECT_EQ(sesh.dev_id, dev_id);
 	EXPECT_EQ(sesh.auth_key, auth_key);
 
-	str = sesh.ping();
-	f = str.find("Ping successful.");
-	EXPECT_NE(f, std::string::npos);
-	printf("ping response : %s\n\n", str.c_str());
+	// str = sesh.ping();
+	// f = str.find("Ping successful.");
+	// EXPECT_NE(f, std::string::npos);
+	// printf("ping response : %s\n\n", str.c_str());
 
-	str = sesh.testsession();
-	f = str.find(
-			"This was a successful test with the following parameters added:");
-	EXPECT_NE(f, std::string::npos);
-	printf("testsession response : %s\n\n", str.c_str());
+	// str = sesh.testsession();
+	// f = str.find(
+	//		"This was a successful test with the following parameters added:");
+	// EXPECT_NE(f, std::string::npos);
+	// printf("testsession response : %s\n\n", str.c_str());
 
 	// std::vector<rez::server_status> server_stats =
 	// sesh.gethirezserverstatus(); ASSERT_GT(server_stats.size(), 0);
@@ -152,6 +152,14 @@ TEST(paladins_pc, everything) {
 	//}
 	// j = mdbs.back();
 	// printf("getmatchdetailsbatch response : %s\n\n", j.dump(4).c_str());
+
+	// date::year_month_day ymd
+	//		= date::floor<date::days>(std::chrono::system_clock::now());
+	// std::vector<rez::match_id> mids
+	//		= sesh.getmatchidsbyqueue(rez::queue_pal_e::live_casual, ymd, 0, 0);
+	// EXPECT_GT(mids.size(), 0);
+	// j = mids.back();
+	// printf("getmatchidsbyqueue response : %s\n\n", j.dump(4).c_str());
 }
 
 TEST(smite_pc, everything) {
@@ -164,16 +172,16 @@ TEST(smite_pc, everything) {
 	EXPECT_EQ(sesh.dev_id, dev_id);
 	EXPECT_EQ(sesh.auth_key, auth_key);
 
-	str = sesh.ping();
-	f = str.find("Ping successful.");
-	EXPECT_NE(f, std::string::npos);
-	printf("ping response : %s\n\n", str.c_str());
+	// str = sesh.ping();
+	// f = str.find("Ping successful.");
+	// EXPECT_NE(f, std::string::npos);
+	// printf("ping response : %s\n\n", str.c_str());
 
-	str = sesh.testsession();
-	f = str.find(
-			"This was a successful test with the following parameters added:");
-	EXPECT_NE(f, std::string::npos);
-	printf("testsession response : %s\n\n", str.c_str());
+	// str = sesh.testsession();
+	// f = str.find(
+	//		"This was a successful test with the following parameters added:");
+	// EXPECT_NE(f, std::string::npos);
+	// printf("testsession response : %s\n\n", str.c_str());
 
 	// std::vector<rez::server_status> server_stats =
 	// sesh.gethirezserverstatus(); ASSERT_GT(server_stats.size(), 0);
@@ -224,8 +232,8 @@ TEST(smite_pc, everything) {
 	// j = gs[0];
 	// printf("getgods response : %s\n\n", j.dump(4).c_str());
 
-	// std::vector<rez::god_leaderboard> gls
-	//		= sesh.getgodleaderboard<440>(grs[0].god_id);
+	// std::vector<rez::god_leaderboard> gls = sesh.getgodleaderboard(
+	//		grs[0].god_id, rez::queue_smi_e::conquest_ranked);
 	// EXPECT_GT(gls.size(), 0);
 	// j = gls[0];
 	// printf("getgodleaderboard response : %s\n\n", j.dump(4).c_str());
@@ -269,6 +277,14 @@ TEST(smite_pc, everything) {
 	//}
 	// j = mdbs.back();
 	// printf("getmatchdetailsbatch response : %s\n\n", j.dump(4).c_str());
+
+	// date::year_month_day ymd
+	//		= date::floor<date::days>(std::chrono::system_clock::now());
+	// std::vector<rez::match_id> mids
+	//		= sesh.getmatchidsbyqueue(rez::queue_smi_e::arena, ymd, 0, 0);
+	// EXPECT_GT(mids.size(), 0);
+	// j = mids.back();
+	// printf("getmatchidsbyqueue response : %s\n\n", j.dump(4).c_str());
 }
 
 // TEST(example, date) {
