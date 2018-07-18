@@ -5,14 +5,21 @@
 #include <nlohmann/json.hpp>
 
 namespace rez {
-void to_json(nlohmann::json& j, const session_response& obj) {
+void to_json(nlohmann::json& j, const nothing&) {
+	j = {};
+}
+void from_json(const nlohmann::json&, nothing& obj) {
+	obj = {};
+}
+
+void to_json(nlohmann::json& j, const session_info& obj) {
 	j = {
 		REZ_TO_J(obj, ret_msg),
 		REZ_TO_J(obj, session_id),
 		REZ_TO_J(obj, timestamp),
 	};
 }
-void from_json(const nlohmann::json& j, session_response& obj) {
+void from_json(const nlohmann::json& j, session_info& obj) {
 	REZ_FROM_J(obj, ret_msg, j);
 	REZ_FROM_J(obj, session_id, j);
 	REZ_FROM_J(obj, timestamp, j);
@@ -590,29 +597,29 @@ void from_json(const nlohmann::json& j, champion_rank& obj) {
 	REZ_FROM_J(obj, ret_msg, j);
 }
 
-void to_json(nlohmann::json& j, const menu_item_smi& obj) {
+void to_json(nlohmann::json& j, const god_menu_item& obj) {
 	j = {
 		REZ_TO_J(obj, description),
 		REZ_TO_J(obj, value),
 	};
 }
-void from_json(const nlohmann::json& j, menu_item_smi& obj) {
+void from_json(const nlohmann::json& j, god_menu_item& obj) {
 	REZ_FROM_J(obj, description, j);
 	REZ_FROM_J(obj, value, j);
 }
 
-void to_json(nlohmann::json& j, const rank_item_smi& obj) {
+void to_json(nlohmann::json& j, const god_rank_item& obj) {
 	j = {
 		REZ_TO_J(obj, description),
 		REZ_TO_J(obj, value),
 	};
 }
-void from_json(const nlohmann::json& j, rank_item_smi& obj) {
+void from_json(const nlohmann::json& j, god_rank_item& obj) {
 	REZ_FROM_J(obj, description, j);
 	REZ_FROM_J(obj, value, j);
 }
 
-void to_json(nlohmann::json& j, const item_description_smi& obj) {
+void to_json(nlohmann::json& j, const god_item_description& obj) {
 	j = {
 		REZ_TO_J(obj, cooldown),
 		REZ_TO_J(obj, cost),
@@ -622,7 +629,7 @@ void to_json(nlohmann::json& j, const item_description_smi& obj) {
 		REZ_TO_J(obj, secondaryDescription),
 	};
 }
-void from_json(const nlohmann::json& j, item_description_smi& obj) {
+void from_json(const nlohmann::json& j, god_item_description& obj) {
 	REZ_FROM_J(obj, cooldown, j);
 	REZ_FROM_J(obj, cost, j);
 	REZ_FROM_J(obj, description, j);
@@ -631,16 +638,16 @@ void from_json(const nlohmann::json& j, item_description_smi& obj) {
 	REZ_FROM_J(obj, secondaryDescription, j);
 }
 
-void to_json(nlohmann::json& j, const ability_description_smi& obj) {
+void to_json(nlohmann::json& j, const god_ability_description& obj) {
 	j = {
 		REZ_TO_J(obj, itemDescription),
 	};
 }
-void from_json(const nlohmann::json& j, ability_description_smi& obj) {
+void from_json(const nlohmann::json& j, god_ability_description& obj) {
 	REZ_FROM_J(obj, itemDescription, j);
 }
 
-void to_json(nlohmann::json& j, const ability_details_smi& obj) {
+void to_json(nlohmann::json& j, const god_ability_details& obj) {
 	j = {
 		REZ_TO_J(obj, Description),
 		REZ_TO_J(obj, Id),
@@ -648,7 +655,7 @@ void to_json(nlohmann::json& j, const ability_details_smi& obj) {
 		REZ_TO_J(obj, URL),
 	};
 }
-void from_json(const nlohmann::json& j, ability_details_smi& obj) {
+void from_json(const nlohmann::json& j, god_ability_details& obj) {
 	REZ_FROM_J(obj, Description, j);
 	REZ_FROM_J(obj, Id, j);
 	REZ_FROM_J(obj, Summary, j);
@@ -780,7 +787,7 @@ void from_json(const nlohmann::json& j, god& obj) {
 	REZ_FROM_J(obj, ret_msg, j);
 }
 
-void to_json(nlohmann::json& j, const ability_details_pal& obj) {
+void to_json(nlohmann::json& j, const champion_ability_details& obj) {
 	j = {
 		REZ_TO_J(obj, Description),
 		REZ_TO_J(obj, Id),
@@ -788,7 +795,7 @@ void to_json(nlohmann::json& j, const ability_details_pal& obj) {
 		REZ_TO_J(obj, URL),
 	};
 }
-void from_json(const nlohmann::json& j, ability_details_pal& obj) {
+void from_json(const nlohmann::json& j, champion_ability_details& obj) {
 	REZ_FROM_J(obj, Description, j);
 	REZ_FROM_J(obj, Id, j);
 	REZ_FROM_J(obj, Summary, j);
@@ -880,6 +887,666 @@ void from_json(const nlohmann::json& j, champion& obj) {
 	REZ_FROM_J(obj, abilityDescription5, j);
 	REZ_FROM_J(obj, id, j);
 	REZ_FROM_J(obj, latestChampion, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const god_leaderboard& obj) {
+	j = {
+		REZ_TO_J(obj, god_id),
+		REZ_TO_J(obj, losses),
+		REZ_TO_J(obj, player_id),
+		REZ_TO_J(obj, player_name),
+		REZ_TO_J(obj, player_ranking),
+		REZ_TO_J(obj, rank),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, wins),
+	};
+}
+void from_json(const nlohmann::json& j, god_leaderboard& obj) {
+	REZ_FROM_J(obj, god_id, j);
+	REZ_FROM_J(obj, losses, j);
+	REZ_FROM_J(obj, player_id, j);
+	REZ_FROM_J(obj, player_name, j);
+	REZ_FROM_J(obj, player_ranking, j);
+	REZ_FROM_J(obj, rank, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, wins, j);
+}
+
+void to_json(nlohmann::json& j, const god_skin& obj) {
+	j = {
+		REZ_TO_J(obj, godIcon_URL),
+		REZ_TO_J(obj, godSkin_URL),
+		REZ_TO_J(obj, god_id),
+		REZ_TO_J(obj, god_name),
+		REZ_TO_J(obj, obtainability),
+		REZ_TO_J(obj, price_favor),
+		REZ_TO_J(obj, price_gems),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, skin_id1),
+		REZ_TO_J(obj, skin_id2),
+		REZ_TO_J(obj, skin_name),
+	};
+}
+void from_json(const nlohmann::json& j, god_skin& obj) {
+	REZ_FROM_J(obj, godIcon_URL, j);
+	REZ_FROM_J(obj, godSkin_URL, j);
+	REZ_FROM_J(obj, god_id, j);
+	REZ_FROM_J(obj, god_name, j);
+	REZ_FROM_J(obj, obtainability, j);
+	REZ_FROM_J(obj, price_favor, j);
+	REZ_FROM_J(obj, price_gems, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, skin_id1, j);
+	REZ_FROM_J(obj, skin_id2, j);
+	REZ_FROM_J(obj, skin_name, j);
+}
+
+void to_json(nlohmann::json& j, const champion_skin& obj) {
+	j = {
+		REZ_TO_J(obj, champion_id),
+		REZ_TO_J(obj, champion_name),
+		REZ_TO_J(obj, rarity),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, skin_id1),
+		REZ_TO_J(obj, skin_id2),
+		REZ_TO_J(obj, skin_name),
+		REZ_TO_J(obj, skin_name_english),
+	};
+}
+void from_json(const nlohmann::json& j, champion_skin& obj) {
+	REZ_FROM_J(obj, champion_id, j);
+	REZ_FROM_J(obj, champion_name, j);
+	REZ_FROM_J(obj, rarity, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, skin_id1, j);
+	REZ_FROM_J(obj, skin_id2, j);
+	REZ_FROM_J(obj, skin_name, j);
+	REZ_FROM_J(obj, skin_name_english, j);
+}
+
+void to_json(nlohmann::json& j, const god_recommended_item& obj) {
+	j = {
+		REZ_TO_J(obj, Category),
+		REZ_TO_J(obj, Item),
+		REZ_TO_J(obj, Role),
+		REZ_TO_J(obj, category_value_id),
+		REZ_TO_J(obj, god_id),
+		REZ_TO_J(obj, god_name),
+		REZ_TO_J(obj, icon_id),
+		REZ_TO_J(obj, item_id),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, role_value_id),
+	};
+}
+void from_json(const nlohmann::json& j, god_recommended_item& obj) {
+	REZ_FROM_J(obj, Category, j);
+	REZ_FROM_J(obj, Item, j);
+	REZ_FROM_J(obj, Role, j);
+	REZ_FROM_J(obj, category_value_id, j);
+	REZ_FROM_J(obj, god_id, j);
+	REZ_FROM_J(obj, god_name, j);
+	REZ_FROM_J(obj, icon_id, j);
+	REZ_FROM_J(obj, item_id, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, role_value_id, j);
+}
+
+void to_json(nlohmann::json& j, const item_pal& obj) {
+	j = {
+		REZ_TO_J(obj, Description),
+		REZ_TO_J(obj, DeviceName),
+		REZ_TO_J(obj, IconId),
+		REZ_TO_J(obj, ItemId),
+		REZ_TO_J(obj, Price),
+		REZ_TO_J(obj, ShortDesc),
+		REZ_TO_J(obj, champion_id),
+		REZ_TO_J(obj, itemIcon_URL),
+		REZ_TO_J(obj, item_type),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, talent_reward_level),
+	};
+}
+void from_json(const nlohmann::json& j, item_pal& obj) {
+	REZ_FROM_J(obj, Description, j);
+	REZ_FROM_J(obj, DeviceName, j);
+	REZ_FROM_J(obj, IconId, j);
+	REZ_FROM_J(obj, ItemId, j);
+	REZ_FROM_J(obj, Price, j);
+	REZ_FROM_J(obj, ShortDesc, j);
+	REZ_FROM_J(obj, champion_id, j);
+	REZ_FROM_J(obj, itemIcon_URL, j);
+	REZ_FROM_J(obj, item_type, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, talent_reward_level, j);
+}
+
+void to_json(nlohmann::json& j, const item_menu_item& obj) {
+	j = {
+		REZ_TO_J(obj, Description),
+		REZ_TO_J(obj, Value),
+	};
+}
+void from_json(const nlohmann::json& j, item_menu_item& obj) {
+	REZ_FROM_J(obj, Description, j);
+	REZ_FROM_J(obj, Value, j);
+}
+
+void to_json(nlohmann::json& j, const item_item_description& obj) {
+	j = {
+		REZ_TO_J(obj, Description),
+		REZ_TO_J(obj, Menuitems),
+		REZ_TO_J(obj, SecondaryDescription),
+	};
+}
+void from_json(const nlohmann::json& j, item_item_description& obj) {
+	REZ_FROM_J(obj, Description, j);
+	REZ_FROM_J(obj, Menuitems, j);
+	REZ_FROM_J(obj, SecondaryDescription, j);
+}
+
+void to_json(nlohmann::json& j, const item_smi& obj) {
+	j = {
+		REZ_TO_J(obj, ChildItemId),
+		REZ_TO_J(obj, DeviceName),
+		REZ_TO_J(obj, IconId),
+		REZ_TO_J(obj, ItemDescription),
+		REZ_TO_J(obj, ItemId),
+		REZ_TO_J(obj, ItemTier),
+		REZ_TO_J(obj, Price),
+		REZ_TO_J(obj, RootItemId),
+		REZ_TO_J(obj, ShortDesc),
+		REZ_TO_J(obj, StartingItem),
+		REZ_TO_J(obj, Type),
+		REZ_TO_J(obj, itemIcon_URL),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, item_smi& obj) {
+	REZ_FROM_J(obj, ChildItemId, j);
+	REZ_FROM_J(obj, DeviceName, j);
+	REZ_FROM_J(obj, IconId, j);
+	REZ_FROM_J(obj, ItemDescription, j);
+	REZ_FROM_J(obj, ItemId, j);
+	REZ_FROM_J(obj, ItemTier, j);
+	REZ_FROM_J(obj, Price, j);
+	REZ_FROM_J(obj, RootItemId, j);
+	REZ_FROM_J(obj, ShortDesc, j);
+	REZ_FROM_J(obj, StartingItem, j);
+	REZ_FROM_J(obj, Type, j);
+	REZ_FROM_J(obj, itemIcon_URL, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const match_details_pal& obj) {
+	j = {
+		REZ_TO_J(obj, Account_Level),
+		REZ_TO_J(obj, ActiveId1),
+		REZ_TO_J(obj, ActiveId2),
+		REZ_TO_J(obj, ActiveId3),
+		REZ_TO_J(obj, ActiveId4),
+		REZ_TO_J(obj, ActiveLevel1),
+		REZ_TO_J(obj, ActiveLevel2),
+		REZ_TO_J(obj, ActiveLevel3),
+		REZ_TO_J(obj, ActiveLevel4),
+		REZ_TO_J(obj, Assists),
+		REZ_TO_J(obj, BanId1),
+		REZ_TO_J(obj, BanId2),
+		REZ_TO_J(obj, BanId3),
+		REZ_TO_J(obj, BanId4),
+		REZ_TO_J(obj, Ban_1),
+		REZ_TO_J(obj, Ban_2),
+		REZ_TO_J(obj, Ban_3),
+		REZ_TO_J(obj, Ban_4),
+		REZ_TO_J(obj, Camps_Cleared),
+		REZ_TO_J(obj, ChampionId),
+		REZ_TO_J(obj, Damage_Bot),
+		REZ_TO_J(obj, Damage_Done_In_Hand),
+		REZ_TO_J(obj, Damage_Done_Magical),
+		REZ_TO_J(obj, Damage_Done_Physical),
+		REZ_TO_J(obj, Damage_Mitigated),
+		REZ_TO_J(obj, Damage_Player),
+		REZ_TO_J(obj, Damage_Taken),
+		REZ_TO_J(obj, Damage_Taken_Magical),
+		REZ_TO_J(obj, Damage_Taken_Physical),
+		REZ_TO_J(obj, Deaths),
+		REZ_TO_J(obj, Distance_Traveled),
+		REZ_TO_J(obj, Entry_Datetime),
+		REZ_TO_J(obj, Final_Match_Level),
+		REZ_TO_J(obj, Gold_Earned),
+		REZ_TO_J(obj, Gold_Per_Minute),
+		REZ_TO_J(obj, Healing),
+		REZ_TO_J(obj, Healing_Bot),
+		REZ_TO_J(obj, Healing_Player_Self),
+		REZ_TO_J(obj, ItemId1),
+		REZ_TO_J(obj, ItemId2),
+		REZ_TO_J(obj, ItemId3),
+		REZ_TO_J(obj, ItemId4),
+		REZ_TO_J(obj, ItemId5),
+		REZ_TO_J(obj, ItemId6),
+		REZ_TO_J(obj, ItemLevel1),
+		REZ_TO_J(obj, ItemLevel2),
+		REZ_TO_J(obj, ItemLevel3),
+		REZ_TO_J(obj, ItemLevel4),
+		REZ_TO_J(obj, ItemLevel5),
+		REZ_TO_J(obj, ItemLevel6),
+		REZ_TO_J(obj, Item_Active_1),
+		REZ_TO_J(obj, Item_Active_2),
+		REZ_TO_J(obj, Item_Active_3),
+		REZ_TO_J(obj, Item_Active_4),
+		REZ_TO_J(obj, Item_Purch_1),
+		REZ_TO_J(obj, Item_Purch_2),
+		REZ_TO_J(obj, Item_Purch_3),
+		REZ_TO_J(obj, Item_Purch_4),
+		REZ_TO_J(obj, Item_Purch_5),
+		REZ_TO_J(obj, Item_Purch_6),
+		REZ_TO_J(obj, Killing_Spree),
+		REZ_TO_J(obj, Kills_Bot),
+		REZ_TO_J(obj, Kills_Double),
+		REZ_TO_J(obj, Kills_Fire_Giant),
+		REZ_TO_J(obj, Kills_First_Blood),
+		REZ_TO_J(obj, Kills_Gold_Fury),
+		REZ_TO_J(obj, Kills_Penta),
+		REZ_TO_J(obj, Kills_Phoenix),
+		REZ_TO_J(obj, Kills_Player),
+		REZ_TO_J(obj, Kills_Quadra),
+		REZ_TO_J(obj, Kills_Siege_Juggernaut),
+		REZ_TO_J(obj, Kills_Single),
+		REZ_TO_J(obj, Kills_Triple),
+		REZ_TO_J(obj, Kills_Wild_Juggernaut),
+		REZ_TO_J(obj, League_Losses),
+		REZ_TO_J(obj, League_Points),
+		REZ_TO_J(obj, League_Tier),
+		REZ_TO_J(obj, League_Wins),
+		REZ_TO_J(obj, Map_Game),
+		REZ_TO_J(obj, Mastery_Level),
+		REZ_TO_J(obj, Match),
+		REZ_TO_J(obj, Minutes),
+		REZ_TO_J(obj, Multi_kill_Max),
+		REZ_TO_J(obj, Objective_Assists),
+		REZ_TO_J(obj, PartyId),
+		REZ_TO_J(obj, Rank_Stat_League),
+		REZ_TO_J(obj, Reference_Name),
+		REZ_TO_J(obj, Region),
+		REZ_TO_J(obj, Skin),
+		REZ_TO_J(obj, SkinId),
+		REZ_TO_J(obj, Structure_Damage),
+		REZ_TO_J(obj, Surrendered),
+		REZ_TO_J(obj, TaskForce),
+		REZ_TO_J(obj, Team1Score),
+		REZ_TO_J(obj, Team2Score),
+		REZ_TO_J(obj, TeamId),
+		REZ_TO_J(obj, Team_Name),
+		REZ_TO_J(obj, Time_In_Match_Seconds),
+		REZ_TO_J(obj, Towers_Destroyed),
+		REZ_TO_J(obj, Wards_Placed),
+		REZ_TO_J(obj, Win_Status),
+		REZ_TO_J(obj, Winning_TaskForce),
+		REZ_TO_J(obj, hasReplay),
+		REZ_TO_J(obj, match_queue_id),
+		REZ_TO_J(obj, name),
+		REZ_TO_J(obj, playerId),
+		REZ_TO_J(obj, playerName),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, match_details_pal& obj) {
+	REZ_FROM_J(obj, Account_Level, j);
+	REZ_FROM_J(obj, ActiveId1, j);
+	REZ_FROM_J(obj, ActiveId2, j);
+	REZ_FROM_J(obj, ActiveId3, j);
+	REZ_FROM_J(obj, ActiveId4, j);
+	REZ_FROM_J(obj, ActiveLevel1, j);
+	REZ_FROM_J(obj, ActiveLevel2, j);
+	REZ_FROM_J(obj, ActiveLevel3, j);
+	REZ_FROM_J(obj, ActiveLevel4, j);
+	REZ_FROM_J(obj, Assists, j);
+	REZ_FROM_J(obj, BanId1, j);
+	REZ_FROM_J(obj, BanId2, j);
+	REZ_FROM_J(obj, BanId3, j);
+	REZ_FROM_J(obj, BanId4, j);
+	REZ_FROM_J(obj, Ban_1, j);
+	REZ_FROM_J(obj, Ban_2, j);
+	REZ_FROM_J(obj, Ban_3, j);
+	REZ_FROM_J(obj, Ban_4, j);
+	REZ_FROM_J(obj, Camps_Cleared, j);
+	REZ_FROM_J(obj, ChampionId, j);
+	REZ_FROM_J(obj, Damage_Bot, j);
+	REZ_FROM_J(obj, Damage_Done_In_Hand, j);
+	REZ_FROM_J(obj, Damage_Done_Magical, j);
+	REZ_FROM_J(obj, Damage_Done_Physical, j);
+	REZ_FROM_J(obj, Damage_Mitigated, j);
+	REZ_FROM_J(obj, Damage_Player, j);
+	REZ_FROM_J(obj, Damage_Taken, j);
+	REZ_FROM_J(obj, Damage_Taken_Magical, j);
+	REZ_FROM_J(obj, Damage_Taken_Physical, j);
+	REZ_FROM_J(obj, Deaths, j);
+	REZ_FROM_J(obj, Distance_Traveled, j);
+	REZ_FROM_J(obj, Entry_Datetime, j);
+	REZ_FROM_J(obj, Final_Match_Level, j);
+	REZ_FROM_J(obj, Gold_Earned, j);
+	REZ_FROM_J(obj, Gold_Per_Minute, j);
+	REZ_FROM_J(obj, Healing, j);
+	REZ_FROM_J(obj, Healing_Bot, j);
+	REZ_FROM_J(obj, Healing_Player_Self, j);
+	REZ_FROM_J(obj, ItemId1, j);
+	REZ_FROM_J(obj, ItemId2, j);
+	REZ_FROM_J(obj, ItemId3, j);
+	REZ_FROM_J(obj, ItemId4, j);
+	REZ_FROM_J(obj, ItemId5, j);
+	REZ_FROM_J(obj, ItemId6, j);
+	REZ_FROM_J(obj, ItemLevel1, j);
+	REZ_FROM_J(obj, ItemLevel2, j);
+	REZ_FROM_J(obj, ItemLevel3, j);
+	REZ_FROM_J(obj, ItemLevel4, j);
+	REZ_FROM_J(obj, ItemLevel5, j);
+	REZ_FROM_J(obj, ItemLevel6, j);
+	REZ_FROM_J(obj, Item_Active_1, j);
+	REZ_FROM_J(obj, Item_Active_2, j);
+	REZ_FROM_J(obj, Item_Active_3, j);
+	REZ_FROM_J(obj, Item_Active_4, j);
+	REZ_FROM_J(obj, Item_Purch_1, j);
+	REZ_FROM_J(obj, Item_Purch_2, j);
+	REZ_FROM_J(obj, Item_Purch_3, j);
+	REZ_FROM_J(obj, Item_Purch_4, j);
+	REZ_FROM_J(obj, Item_Purch_5, j);
+	REZ_FROM_J(obj, Item_Purch_6, j);
+	REZ_FROM_J(obj, Killing_Spree, j);
+	REZ_FROM_J(obj, Kills_Bot, j);
+	REZ_FROM_J(obj, Kills_Double, j);
+	REZ_FROM_J(obj, Kills_Fire_Giant, j);
+	REZ_FROM_J(obj, Kills_First_Blood, j);
+	REZ_FROM_J(obj, Kills_Gold_Fury, j);
+	REZ_FROM_J(obj, Kills_Penta, j);
+	REZ_FROM_J(obj, Kills_Phoenix, j);
+	REZ_FROM_J(obj, Kills_Player, j);
+	REZ_FROM_J(obj, Kills_Quadra, j);
+	REZ_FROM_J(obj, Kills_Siege_Juggernaut, j);
+	REZ_FROM_J(obj, Kills_Single, j);
+	REZ_FROM_J(obj, Kills_Triple, j);
+	REZ_FROM_J(obj, Kills_Wild_Juggernaut, j);
+	REZ_FROM_J(obj, League_Losses, j);
+	REZ_FROM_J(obj, League_Points, j);
+	REZ_FROM_J(obj, League_Tier, j);
+	REZ_FROM_J(obj, League_Wins, j);
+	REZ_FROM_J(obj, Map_Game, j);
+	REZ_FROM_J(obj, Mastery_Level, j);
+	REZ_FROM_J(obj, Match, j);
+	REZ_FROM_J(obj, Minutes, j);
+	REZ_FROM_J(obj, Multi_kill_Max, j);
+	REZ_FROM_J(obj, Objective_Assists, j);
+	REZ_FROM_J(obj, PartyId, j);
+	REZ_FROM_J(obj, Rank_Stat_League, j);
+	REZ_FROM_J(obj, Reference_Name, j);
+	REZ_FROM_J(obj, Region, j);
+	REZ_FROM_J(obj, Skin, j);
+	REZ_FROM_J(obj, SkinId, j);
+	REZ_FROM_J(obj, Structure_Damage, j);
+	REZ_FROM_J(obj, Surrendered, j);
+	REZ_FROM_J(obj, TaskForce, j);
+	REZ_FROM_J(obj, Team1Score, j);
+	REZ_FROM_J(obj, Team2Score, j);
+	REZ_FROM_J(obj, TeamId, j);
+	REZ_FROM_J(obj, Team_Name, j);
+	REZ_FROM_J(obj, Time_In_Match_Seconds, j);
+	REZ_FROM_J(obj, Towers_Destroyed, j);
+	REZ_FROM_J(obj, Wards_Placed, j);
+	REZ_FROM_J(obj, Win_Status, j);
+	REZ_FROM_J(obj, Winning_TaskForce, j);
+	REZ_FROM_J(obj, hasReplay, j);
+	REZ_FROM_J(obj, match_queue_id, j);
+	REZ_FROM_J(obj, name, j);
+	REZ_FROM_J(obj, playerId, j);
+	REZ_FROM_J(obj, playerName, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const match_details_smi& obj) {
+	j = {
+		REZ_TO_J(obj, Account_Level),
+		REZ_TO_J(obj, ActiveId1),
+		REZ_TO_J(obj, ActiveId2),
+		REZ_TO_J(obj, ActiveId3),
+		REZ_TO_J(obj, ActiveId4),
+		REZ_TO_J(obj, Assists),
+		REZ_TO_J(obj, Ban1),
+		REZ_TO_J(obj, Ban10),
+		REZ_TO_J(obj, Ban10Id),
+		REZ_TO_J(obj, Ban1Id),
+		REZ_TO_J(obj, Ban2),
+		REZ_TO_J(obj, Ban2Id),
+		REZ_TO_J(obj, Ban3),
+		REZ_TO_J(obj, Ban3Id),
+		REZ_TO_J(obj, Ban4),
+		REZ_TO_J(obj, Ban4Id),
+		REZ_TO_J(obj, Ban5),
+		REZ_TO_J(obj, Ban5Id),
+		REZ_TO_J(obj, Ban6),
+		REZ_TO_J(obj, Ban6Id),
+		REZ_TO_J(obj, Ban7),
+		REZ_TO_J(obj, Ban7Id),
+		REZ_TO_J(obj, Ban8),
+		REZ_TO_J(obj, Ban8Id),
+		REZ_TO_J(obj, Ban9),
+		REZ_TO_J(obj, Ban9Id),
+		REZ_TO_J(obj, Camps_Cleared),
+		REZ_TO_J(obj, Conquest_Losses),
+		REZ_TO_J(obj, Conquest_Points),
+		REZ_TO_J(obj, Conquest_Tier),
+		REZ_TO_J(obj, Conquest_Wins),
+		REZ_TO_J(obj, Damage_Bot),
+		REZ_TO_J(obj, Damage_Done_In_Hand),
+		REZ_TO_J(obj, Damage_Done_Magical),
+		REZ_TO_J(obj, Damage_Done_Physical),
+		REZ_TO_J(obj, Damage_Mitigated),
+		REZ_TO_J(obj, Damage_Player),
+		REZ_TO_J(obj, Damage_Taken),
+		REZ_TO_J(obj, Damage_Taken_Magical),
+		REZ_TO_J(obj, Damage_Taken_Physical),
+		REZ_TO_J(obj, Deaths),
+		REZ_TO_J(obj, Distance_Traveled),
+		REZ_TO_J(obj, Duel_Losses),
+		REZ_TO_J(obj, Duel_Points),
+		REZ_TO_J(obj, Duel_Tier),
+		REZ_TO_J(obj, Duel_Wins),
+		REZ_TO_J(obj, Entry_Datetime),
+		REZ_TO_J(obj, Final_Match_Level),
+		REZ_TO_J(obj, First_Ban_Side),
+		REZ_TO_J(obj, GodId),
+		REZ_TO_J(obj, Gold_Earned),
+		REZ_TO_J(obj, Gold_Per_Minute),
+		REZ_TO_J(obj, Healing),
+		REZ_TO_J(obj, Healing_Bot),
+		REZ_TO_J(obj, Healing_Player_Self),
+		REZ_TO_J(obj, ItemId1),
+		REZ_TO_J(obj, ItemId2),
+		REZ_TO_J(obj, ItemId3),
+		REZ_TO_J(obj, ItemId4),
+		REZ_TO_J(obj, ItemId5),
+		REZ_TO_J(obj, ItemId6),
+		REZ_TO_J(obj, Item_Active_1),
+		REZ_TO_J(obj, Item_Active_2),
+		REZ_TO_J(obj, Item_Active_3),
+		REZ_TO_J(obj, Item_Active_4),
+		REZ_TO_J(obj, Item_Purch_1),
+		REZ_TO_J(obj, Item_Purch_2),
+		REZ_TO_J(obj, Item_Purch_3),
+		REZ_TO_J(obj, Item_Purch_4),
+		REZ_TO_J(obj, Item_Purch_5),
+		REZ_TO_J(obj, Item_Purch_6),
+		REZ_TO_J(obj, Joust_Losses),
+		REZ_TO_J(obj, Joust_Points),
+		REZ_TO_J(obj, Joust_Tier),
+		REZ_TO_J(obj, Joust_Wins),
+		REZ_TO_J(obj, Killing_Spree),
+		REZ_TO_J(obj, Kills_Bot),
+		REZ_TO_J(obj, Kills_Double),
+		REZ_TO_J(obj, Kills_Fire_Giant),
+		REZ_TO_J(obj, Kills_First_Blood),
+		REZ_TO_J(obj, Kills_Gold_Fury),
+		REZ_TO_J(obj, Kills_Penta),
+		REZ_TO_J(obj, Kills_Phoenix),
+		REZ_TO_J(obj, Kills_Player),
+		REZ_TO_J(obj, Kills_Quadra),
+		REZ_TO_J(obj, Kills_Siege_Juggernaut),
+		REZ_TO_J(obj, Kills_Single),
+		REZ_TO_J(obj, Kills_Triple),
+		REZ_TO_J(obj, Kills_Wild_Juggernaut),
+		REZ_TO_J(obj, Map_Game),
+		REZ_TO_J(obj, Mastery_Level),
+		REZ_TO_J(obj, Match),
+		REZ_TO_J(obj, Minutes),
+		REZ_TO_J(obj, Multi_kill_Max),
+		REZ_TO_J(obj, Objective_Assists),
+		REZ_TO_J(obj, PartyId),
+		REZ_TO_J(obj, Rank_Stat_Conquest),
+		REZ_TO_J(obj, Rank_Stat_Duel),
+		REZ_TO_J(obj, Rank_Stat_Joust),
+		REZ_TO_J(obj, Reference_Name),
+		REZ_TO_J(obj, Region),
+		REZ_TO_J(obj, Skin),
+		REZ_TO_J(obj, SkinId),
+		REZ_TO_J(obj, Structure_Damage),
+		REZ_TO_J(obj, Surrendered),
+		REZ_TO_J(obj, TaskForce),
+		REZ_TO_J(obj, Team1Score),
+		REZ_TO_J(obj, Team2Score),
+		REZ_TO_J(obj, TeamId),
+		REZ_TO_J(obj, Team_Name),
+		REZ_TO_J(obj, Time_In_Match_Seconds),
+		REZ_TO_J(obj, Towers_Destroyed),
+		REZ_TO_J(obj, Wards_Placed),
+		REZ_TO_J(obj, Win_Status),
+		REZ_TO_J(obj, Winning_TaskForce),
+		REZ_TO_J(obj, hasReplay),
+		REZ_TO_J(obj, match_queue_id),
+		REZ_TO_J(obj, name),
+		REZ_TO_J(obj, playerId),
+		REZ_TO_J(obj, playerName),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, match_details_smi& obj) {
+	REZ_FROM_J(obj, Account_Level, j);
+	REZ_FROM_J(obj, ActiveId1, j);
+	REZ_FROM_J(obj, ActiveId2, j);
+	REZ_FROM_J(obj, ActiveId3, j);
+	REZ_FROM_J(obj, ActiveId4, j);
+	REZ_FROM_J(obj, Assists, j);
+	REZ_FROM_J(obj, Ban1, j);
+	REZ_FROM_J(obj, Ban10, j);
+	REZ_FROM_J(obj, Ban10Id, j);
+	REZ_FROM_J(obj, Ban1Id, j);
+	REZ_FROM_J(obj, Ban2, j);
+	REZ_FROM_J(obj, Ban2Id, j);
+	REZ_FROM_J(obj, Ban3, j);
+	REZ_FROM_J(obj, Ban3Id, j);
+	REZ_FROM_J(obj, Ban4, j);
+	REZ_FROM_J(obj, Ban4Id, j);
+	REZ_FROM_J(obj, Ban5, j);
+	REZ_FROM_J(obj, Ban5Id, j);
+	REZ_FROM_J(obj, Ban6, j);
+	REZ_FROM_J(obj, Ban6Id, j);
+	REZ_FROM_J(obj, Ban7, j);
+	REZ_FROM_J(obj, Ban7Id, j);
+	REZ_FROM_J(obj, Ban8, j);
+	REZ_FROM_J(obj, Ban8Id, j);
+	REZ_FROM_J(obj, Ban9, j);
+	REZ_FROM_J(obj, Ban9Id, j);
+	REZ_FROM_J(obj, Camps_Cleared, j);
+	REZ_FROM_J(obj, Conquest_Losses, j);
+	REZ_FROM_J(obj, Conquest_Points, j);
+	REZ_FROM_J(obj, Conquest_Tier, j);
+	REZ_FROM_J(obj, Conquest_Wins, j);
+	REZ_FROM_J(obj, Damage_Bot, j);
+	REZ_FROM_J(obj, Damage_Done_In_Hand, j);
+	REZ_FROM_J(obj, Damage_Done_Magical, j);
+	REZ_FROM_J(obj, Damage_Done_Physical, j);
+	REZ_FROM_J(obj, Damage_Mitigated, j);
+	REZ_FROM_J(obj, Damage_Player, j);
+	REZ_FROM_J(obj, Damage_Taken, j);
+	REZ_FROM_J(obj, Damage_Taken_Magical, j);
+	REZ_FROM_J(obj, Damage_Taken_Physical, j);
+	REZ_FROM_J(obj, Deaths, j);
+	REZ_FROM_J(obj, Distance_Traveled, j);
+	REZ_FROM_J(obj, Duel_Losses, j);
+	REZ_FROM_J(obj, Duel_Points, j);
+	REZ_FROM_J(obj, Duel_Tier, j);
+	REZ_FROM_J(obj, Duel_Wins, j);
+	REZ_FROM_J(obj, Entry_Datetime, j);
+	REZ_FROM_J(obj, Final_Match_Level, j);
+	REZ_FROM_J(obj, First_Ban_Side, j);
+	REZ_FROM_J(obj, GodId, j);
+	REZ_FROM_J(obj, Gold_Earned, j);
+	REZ_FROM_J(obj, Gold_Per_Minute, j);
+	REZ_FROM_J(obj, Healing, j);
+	REZ_FROM_J(obj, Healing_Bot, j);
+	REZ_FROM_J(obj, Healing_Player_Self, j);
+	REZ_FROM_J(obj, ItemId1, j);
+	REZ_FROM_J(obj, ItemId2, j);
+	REZ_FROM_J(obj, ItemId3, j);
+	REZ_FROM_J(obj, ItemId4, j);
+	REZ_FROM_J(obj, ItemId5, j);
+	REZ_FROM_J(obj, ItemId6, j);
+	REZ_FROM_J(obj, Item_Active_1, j);
+	REZ_FROM_J(obj, Item_Active_2, j);
+	REZ_FROM_J(obj, Item_Active_3, j);
+	REZ_FROM_J(obj, Item_Active_4, j);
+	REZ_FROM_J(obj, Item_Purch_1, j);
+	REZ_FROM_J(obj, Item_Purch_2, j);
+	REZ_FROM_J(obj, Item_Purch_3, j);
+	REZ_FROM_J(obj, Item_Purch_4, j);
+	REZ_FROM_J(obj, Item_Purch_5, j);
+	REZ_FROM_J(obj, Item_Purch_6, j);
+	REZ_FROM_J(obj, Joust_Losses, j);
+	REZ_FROM_J(obj, Joust_Points, j);
+	REZ_FROM_J(obj, Joust_Tier, j);
+	REZ_FROM_J(obj, Joust_Wins, j);
+	REZ_FROM_J(obj, Killing_Spree, j);
+	REZ_FROM_J(obj, Kills_Bot, j);
+	REZ_FROM_J(obj, Kills_Double, j);
+	REZ_FROM_J(obj, Kills_Fire_Giant, j);
+	REZ_FROM_J(obj, Kills_First_Blood, j);
+	REZ_FROM_J(obj, Kills_Gold_Fury, j);
+	REZ_FROM_J(obj, Kills_Penta, j);
+	REZ_FROM_J(obj, Kills_Phoenix, j);
+	REZ_FROM_J(obj, Kills_Player, j);
+	REZ_FROM_J(obj, Kills_Quadra, j);
+	REZ_FROM_J(obj, Kills_Siege_Juggernaut, j);
+	REZ_FROM_J(obj, Kills_Single, j);
+	REZ_FROM_J(obj, Kills_Triple, j);
+	REZ_FROM_J(obj, Kills_Wild_Juggernaut, j);
+	REZ_FROM_J(obj, Map_Game, j);
+	REZ_FROM_J(obj, Mastery_Level, j);
+	REZ_FROM_J(obj, Match, j);
+	REZ_FROM_J(obj, Minutes, j);
+	REZ_FROM_J(obj, Multi_kill_Max, j);
+	REZ_FROM_J(obj, Objective_Assists, j);
+	REZ_FROM_J(obj, PartyId, j);
+	REZ_FROM_J(obj, Rank_Stat_Conquest, j);
+	REZ_FROM_J(obj, Rank_Stat_Duel, j);
+	REZ_FROM_J(obj, Rank_Stat_Joust, j);
+	REZ_FROM_J(obj, Reference_Name, j);
+	REZ_FROM_J(obj, Region, j);
+	REZ_FROM_J(obj, Skin, j);
+	REZ_FROM_J(obj, SkinId, j);
+	REZ_FROM_J(obj, Structure_Damage, j);
+	REZ_FROM_J(obj, Surrendered, j);
+	REZ_FROM_J(obj, TaskForce, j);
+	REZ_FROM_J(obj, Team1Score, j);
+	REZ_FROM_J(obj, Team2Score, j);
+	REZ_FROM_J(obj, TeamId, j);
+	REZ_FROM_J(obj, Team_Name, j);
+	REZ_FROM_J(obj, Time_In_Match_Seconds, j);
+	REZ_FROM_J(obj, Towers_Destroyed, j);
+	REZ_FROM_J(obj, Wards_Placed, j);
+	REZ_FROM_J(obj, Win_Status, j);
+	REZ_FROM_J(obj, Winning_TaskForce, j);
+	REZ_FROM_J(obj, hasReplay, j);
+	REZ_FROM_J(obj, match_queue_id, j);
+	REZ_FROM_J(obj, name, j);
+	REZ_FROM_J(obj, playerId, j);
+	REZ_FROM_J(obj, playerName, j);
 	REZ_FROM_J(obj, ret_msg, j);
 }
 } // namespace rez

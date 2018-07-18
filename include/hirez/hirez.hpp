@@ -9,8 +9,10 @@
 #include <cpprest/http_client.h>
 #include <cpprest/uri.h>
 #include <date/date.h>
+#include <fstream>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <websocketpp/common/md5.hpp>
 
 namespace rez {
@@ -54,12 +56,26 @@ struct session {
 	const wchar_t* response = L"json";
 	const wchar_t* game_url
 			= detail::game_uris[static_cast<size_t>(EndPointFmt)].data();
+	static constexpr bool paladins_api = EndPointFmt == game_e::paladins_pc
+			|| EndPointFmt == game_e::paladins_ps4
+			|| EndPointFmt == game_e::paladins_xbox;
 
 	template <class DevId, class AuthKey>
-	session(DevId&& _dev_id, AuthKey&& _auth_key)
+	session(DevId&& _dev_id, AuthKey&& _auth_key,
+			bool cache_session_to_disk = true)
 			: dev_id(std::forward<DevId>(_dev_id))
 			, auth_key(std::forward<AuthKey>(_auth_key))
-			, _http_client(game_url) {
+			, _http_client(game_url)
+			, _cache_session_to_disk(cache_session_to_disk) {
+		if (_cache_session_to_disk) {
+			sesh_info = load_session_info();
+		}
+	}
+
+	~session() {
+		if (_cache_session_to_disk) {
+			save_session_info(sesh_info);
+		}
 	}
 
 	session(const session&) = default;
@@ -94,9 +110,10 @@ struct session {
 					} else {
 						fwprintf(stderr,
 								L"Response invalid.\nStatus code : %hu\n"
-								L"Calling end-point : %s\n"
+								L"Calling end-point : %s%s\n"
 								L"Response :\n%s\n",
-								resp.status_code(), builder.to_string().c_str(),
+								resp.status_code(), game_url,
+								builder.to_string().c_str(),
 								resp.to_string().c_str());
 					}
 				})
@@ -109,6 +126,9 @@ struct session {
 	std::string session_call(const std::wstring& cmd, Ts&&... args) {
 		static_assert((std::is_same_v<std::wstring, std::decay_t<Ts>> && ...),
 				"arguments must be std::wstring");
+
+		reconnect_if_needed();
+
 		return call(cmd, wdev_id(), signature(cmd), wsession_id(), timestamp(),
 				std::forward<Ts>(args)...);
 	}
@@ -137,9 +157,10 @@ struct session {
 	// /createsession[ResponseFormat]/{developerId}/{signature}/{timestamp}
 	// A required step to Authenticate the developerId/signature for further API
 	// use.
-	session_response createsession() {
-		session_info = nlohmann::json::parse(session_call(L"createsession"));
-		return session_info;
+	const session_info& createsession() {
+		sesh_info = nlohmann::json::parse(call(L"createsession", wdev_id(),
+				signature(L"createsession"), timestamp()));
+		return sesh_info;
 	}
 
 	// /testsession[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}
@@ -168,9 +189,7 @@ struct session {
 	// Returns information regarding a particular match.  Rarely used in lieu of
 	// getmatchdetails().
 	auto getdemodetails(int match_id) {
-		if constexpr (EndPointFmt == game_e::paladins_pc
-				|| EndPointFmt == game_e::paladins_ps4
-				|| EndPointFmt == game_e::paladins_xbox) {
+		if constexpr (paladins_api) {
 			std::vector<demo_details_pal> ret = nlohmann::json::parse(
 					session_call(L"getdemodetails", std::to_wstring(match_id)));
 			return ret;
@@ -206,10 +225,8 @@ struct session {
 	// Returns the Rank and Worshippers value for each God a player has
 	// played. [SmiteAPI only]
 	std::vector<god_rank> getgodranks(const std::string& player) {
-		static_assert(EndPointFmt == game_e::smite_pc
-						|| EndPointFmt == game_e::smite_ps4
-						|| EndPointFmt == game_e::smite_xbox,
-				"getgodranks only works on Smite end-points");
+		static_assert(
+				!paladins_api, "getgodranks only works on Smite end-points");
 		return nlohmann::json::parse(
 				session_call(L"getgodranks", to_wstring(player)));
 	}
@@ -218,9 +235,7 @@ struct session {
 	// Returns the Rank and Worshippers value for each Champion a player has
 	// played. [PaladinsAPI only]
 	std::vector<champion_rank> getchampionranks(const std::string& player) {
-		static_assert(EndPointFmt == game_e::paladins_pc
-						|| EndPointFmt == game_e::paladins_ps4
-						|| EndPointFmt == game_e::paladins_xbox,
+		static_assert(paladins_api,
 				"getchampionranks only works on Paladins end-points");
 		return nlohmann::json::parse(
 				session_call(L"getchampionranks", to_wstring(player)));
@@ -229,10 +244,7 @@ struct session {
 	// /getgods[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{languageCode}
 	// Returns all Gods and their various attributes. [SmiteAPI only]
 	std::vector<god> getgods(language_e language) {
-		static_assert(EndPointFmt == game_e::smite_pc
-						|| EndPointFmt == game_e::smite_ps4
-						|| EndPointFmt == game_e::smite_xbox,
-				"getgods only works on Smite end-points");
+		static_assert(!paladins_api, "getgods only works on Smite end-points");
 		return nlohmann::json::parse(session_call(
 				L"getgods", std::to_wstring(static_cast<int>(language))));
 	}
@@ -241,88 +253,156 @@ struct session {
 	// Returns all Champions and their various attributes. [PaladinsAPI
 	// only]
 	std::vector<champion> getchampions(language_e language) {
-		static_assert(EndPointFmt == game_e::paladins_pc
-						|| EndPointFmt == game_e::paladins_ps4
-						|| EndPointFmt == game_e::paladins_xbox,
-				"getchampions only works on Paladins end-points");
+		static_assert(
+				paladins_api, "getchampions only works on Paladins end-points");
 		return nlohmann::json::parse(session_call(
 				L"getchampions", std::to_wstring(static_cast<int>(language))));
 	}
 
 	// /getgodleaderboard[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{queue}
-	// Returns the current season’s leaderboard for a god/queue
-	// combination. [SmiteAPI only; queues 440, 450, 451 only]
-	// template <int Queue = 440>
-	// std::string getgodleaderboard(int god_id) {
-	//	static_assert(EndPointFmt == game_e::smite_pc
-	//					|| EndPointFmt == game_e::smite_ps4
-	//					|| EndPointFmt == game_e::smite_xbox,
-	//			"getgodleaderboard only works on Smite end-points");
-	//	static_assert(Queue == 440 || Queue == 450 || Queue == 451,
-	//			"getgodleaderboard queue must be 440, 450 or 451");
-	//	return nlohmann::json::parse(
-	//			session_call(L"getgodleaderboard", std::to_wstring(god_id),
-	//					std::to_wstring(Queue)))
-	//			.dump(4);
-	//}
+	// Returns the current season’s leaderboard for a god/queue combination.
+	// [SmiteAPI only; queues 440, 450, 451 only]
+	template <int Queue = 440>
+	std::vector<god_leaderboard> getgodleaderboard(int god_id) {
+		static_assert(!paladins_api,
+				"getgodleaderboard only works on Smite end-points");
+		static_assert(Queue == 440 || Queue == 450 || Queue == 451,
+				"getgodleaderboard queue must be 440, 450 or 451");
+		return nlohmann::json::parse(session_call(L"getgodleaderboard",
+				std::to_wstring(god_id), std::to_wstring(Queue)));
+	}
 
 	// /getgodskins[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{languageCode}
-	// Returns all available skins for a particular God.
+	// Returns all available skins for a particular God. [SmiteAPI only]
+	std::vector<god_skin> getgodskins(int god_id, language_e language) {
+		static_assert(
+				!paladins_api, "getgodskins only works on Smite end-points");
+		return nlohmann::json::parse(
+				session_call(L"getgodskins", std::to_wstring(god_id),
+						std::to_wstring(static_cast<int>(language))));
+	}
 
 	// /getchampionskins[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godId}/{languageCode}
-	// Returns all available skins for a particular
-	// Champion. [PaladinsAPI only]
+	// Returns all available skins for a particular Champion. [PaladinsAPI only]
+	std::vector<champion_skin> getchampionskins(
+			int champion_id, language_e language) {
+		static_assert(paladins_api,
+				"getchampionskins only works on Paladins end-points");
+		return nlohmann::json::parse(
+				session_call(L"getchampionskins", std::to_wstring(champion_id),
+						std::to_wstring(static_cast<int>(language))));
+	}
 
 	// /getgodrecommendeditems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godid}/{languageCode}
-	// Returns the Recommended Items for a
-	// particular God.  [SmiteAPI only]
+	// Returns the Recommended Items for a particular God. [SmiteAPI only]
+	std::vector<god_recommended_item> getgodrecommendeditems(
+			int god_id, language_e language) {
+		static_assert(!paladins_api,
+				"getgodrecommendeditems only works on Smite end-points");
+		return nlohmann::json::parse(
+				session_call(L"getgodrecommendeditems", std::to_wstring(god_id),
+						std::to_wstring(static_cast<int>(language))));
+	}
 
-	// /getchampionecommendeditems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godid}/{languageCode}
-	// Returns the Recommended Items for
-	// a particular Champion.
-	// [PaladinsAPI only; Osbsolete - no
-	// data returned]
+	// /getchampionrecommendeditems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{godid}/{languageCode}
+	// Returns the Recommended Items for a particular Champion. [PaladinsAPI
+	// only; Osbsolete - no data returned]
+	std::string getchampionrecommendeditems(
+			int champion_id, language_e language) {
+		static_assert(paladins_api,
+				"getchampionrecommendeditems only works on Paladins "
+				"end-points");
+		return nlohmann::json::parse(
+				session_call(L"getchampionrecommendeditems",
+						std::to_wstring(champion_id),
+						std::to_wstring(static_cast<int>(language))))
+				.dump(4);
+	}
 
 	// /getitems[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{languagecode}
-	// Returns all Items and
-	// their various attributes.
+	// Returns all Items and their various attributes.
+	auto getitems(language_e language) {
+		if constexpr (paladins_api) {
+			std::vector<item_pal> ret = nlohmann::json::parse(session_call(
+					L"getitems", std::to_wstring(static_cast<int>(language))));
+			return ret;
+		} else {
+			std::vector<item_smi> ret = nlohmann::json::parse(session_call(
+					L"getitems", std::to_wstring(static_cast<int>(language))));
+			return ret;
+		}
+	}
 
 	// /getmatchdetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
-	// Returns the
-	// statistics for a
-	// particular
-	// completed match.
+	// Returns the statistics for a particular completed match.
+	auto getmatchdetails(int match_id) {
+		if constexpr (paladins_api) {
+			std::vector<match_details_pal> ret
+					= nlohmann::json::parse(session_call(
+							L"getmatchdetails", std::to_wstring(match_id)));
+			return ret;
+		} else {
+			std::vector<match_details_smi> ret
+					= nlohmann::json::parse(session_call(
+							L"getmatchdetails", std::to_wstring(match_id)));
+			return ret;
+		}
+	}
 
 	// /getmatchdetailsbatch[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id,match_id,match_id,...match_id}
-	// Returns
-	// the
-	// statistics
-	// for a
-	// particular
-	// set of
-	// completed
-	// matches.
-	// NOTE:
-	// There is
-	// a byte
-	// imit to
-	// the
-	// amount of
-	// data
-	// returned;
-	// please
-	// limit the
-	// CSV
-	// parameter
-	// to 5 to
-	// 10
-	// matches
-	// because
-	// of this
-	// and for
-	// Hi-Rez DB
-	// Performance
-	// reasons.
+	// Returns the statistics for a particular set of completed matches.
+	// NOTE: There is a byte imit to the amount of data returned; please limit
+	// the CSV parameter to 5 to 10 matches because of this and for Hi-Rez DB
+	// Performance reasons.
+	auto getmatchdetailsbatch(const std::vector<int>& match_ids) {
+		const size_t num_batch = 5;
+		std::vector<std::wstring> match_ids_s{ match_ids.size() };
+		std::transform(match_ids.begin(), match_ids.end(), match_ids_s.begin(),
+				[](int id) { return std::to_wstring(id) + L","; });
+
+		auto move_data = [](auto& details, auto& ret) {
+			std::unordered_map<int, std::decay_t<decltype(details)>> map;
+			for (auto& d : details) {
+				map[d.Match].push_back(std::move(d));
+			}
+			for (auto& v : map) {
+				ret.push_back(std::move(v.second));
+			}
+		};
+
+		auto get_data = [&](auto& ret) {
+			for (size_t i = 0; i < match_ids_s.size(); i += num_batch) {
+				size_t end = std::min(i + num_batch, match_ids_s.size());
+				std::wstring arg;
+				arg.reserve((10 + 1) * num_batch);
+				arg = std::accumulate(match_ids_s.begin() + i,
+						match_ids_s.begin() + end, arg);
+				arg.resize(arg.size() - 1);
+
+				if constexpr (paladins_api) {
+					std::vector<match_details_pal> details
+							= nlohmann::json::parse(
+									session_call(L"getmatchdetailsbatch", arg));
+					move_data(details, ret);
+				} else {
+					std::vector<match_details_smi> details
+							= nlohmann::json::parse(
+									session_call(L"getmatchdetailsbatch", arg));
+					move_data(details, ret);
+				}
+			}
+		};
+
+		if constexpr (paladins_api) {
+			std::vector<std::vector<match_details_pal>> ret{};
+			get_data(ret);
+			return ret;
+		} else {
+			std::vector<std::vector<match_details_smi>> ret{};
+			get_data(ret);
+			return ret;
+		}
+	}
 
 	// /getmatchplayerdetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
 	// Returns player information for a live match.
@@ -448,14 +528,58 @@ struct session {
 	}
 
 	std::wstring wsession_id() const {
-		return to_wstring(session_info.session_id);
+		return to_wstring(sesh_info.session_id);
+	}
+
+	void save_session_info(const session_info& si) const {
+		std::ofstream ofs{ ".cache", std::ios::binary };
+		if (!ofs.is_open())
+			return;
+
+		size_t size = si.ret_msg.size();
+		ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
+		ofs.write(si.ret_msg.c_str(), si.ret_msg.size());
+		size = si.session_id.size();
+		ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
+		ofs.write(si.session_id.c_str(), si.session_id.size());
+		ofs.write(reinterpret_cast<const char*>(&si.timestamp),
+				sizeof(si.timestamp));
+	}
+
+	session_info load_session_info() {
+		session_info ret{};
+		std::ifstream ifs{ ".cache", std::ios::binary };
+		if (!ifs.is_open())
+			return ret;
+
+		size_t size = 0;
+		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+		ret.ret_msg = std::string(size, '\0');
+		ifs.read(ret.ret_msg.data(), size);
+		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+		ret.session_id = std::string(size, '\0');
+		ifs.read(ret.session_id.data(), size);
+		ifs.read(
+				reinterpret_cast<char*>(&ret.timestamp), sizeof(ret.timestamp));
+		return ret;
 	}
 
 	std::string dev_id{ "" };
 	std::string auth_key{ "" };
-	session_response session_info;
+	session_info sesh_info;
 
 private:
+	void reconnect_if_needed() {
+		using namespace std::chrono_literals;
+		date::sys_seconds time = std::chrono::floor<std::chrono::seconds>(
+				std::chrono::system_clock::now());
+		if (time - sesh_info.timestamp >= 14min) {
+			createsession();
+			printf("session expired, reconnected\n\n");
+		}
+	}
+
 	web::http::client::http_client _http_client;
+	bool _cache_session_to_disk;
 };
 } // namespace rez

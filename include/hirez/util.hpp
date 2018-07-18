@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <cassert>
 #include <codecvt>
 #include <date/date.h>
 #include <locale>
@@ -15,29 +16,48 @@
 
 namespace rez {
 namespace detail {
-inline const char* date_format = "%m/%d/%Y %I:%M:%S%p";
+inline const char* date_format = "%m/%d/%Y %I:%M:%S %p";
 inline const char* date_format2 = "%Y-%m-%d  %T";
 
 template <class T>
 inline void get_v(const nlohmann::json& j, const char* key, T& val) {
+	bool key_found = j.find(key) != j.end();
+
+#if !defined(NDEBUG)
+	if (!key_found) {
+		fprintf(stderr, "'%s' :\n    key '%s' not found\n", j.dump().c_str(),
+				key);
+	}
+#endif // NDEBUG)
+
 	if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-		if (j.at(key).is_null()) {
+		if (key_found && j.at(key).is_null()) {
 			val = "";
-		} else if (j.at(key).is_number_integer()) {
+		} else if (key_found && j.at(key).is_number_integer()) {
 			val = std::to_string(j.value(key, 0));
+		} else if (key_found && j.at(key).is_number_float()) {
+			val = std::to_string(j.value(key, 0.f));
 		} else {
 			val = j.value(key, "");
 		}
 	} else if constexpr (std::is_same_v<int, std::decay_t<T>>) {
-		if (j.at(key).is_null()) {
+		if (key_found && j.at(key).is_null()) {
 			val = 0;
-		} else if (j.at(key).is_string()) {
+		} else if (key_found && j.at(key).is_string()) {
 			val = std::stoi(j.value(key, "0"));
 		} else {
 			val = j.value(key, 0);
 		}
+	} else if constexpr (std::is_same_v<float, std::decay_t<T>>) {
+		if (key_found && j.at(key).is_null()) {
+			val = 0.f;
+		} else if (key_found && j.at(key).is_string()) {
+			val = std::stof(j.value(key, "0.0"));
+		} else {
+			val = j.value(key, 0.f);
+		}
 	} else {
-		if (j.at(key).is_null()) {
+		if (key_found && j.at(key).is_null()) {
 			val = T{};
 		} else {
 			val = j.value(key, T{});
@@ -71,16 +91,6 @@ struct adl_serializer<date::sys_seconds> {
 		}
 
 		std::string time = j.get<std::string>();
-		size_t off = time.find(" PM");
-		if (off != std::string::npos) {
-			time.replace(off, 1, "");
-		}
-		off = time.find(" AM");
-		if (off != std::string::npos) {
-			time.replace(off, 1, "");
-		}
-		// printf("\nTIME %s\n", time.c_str());
-
 		std::istringstream iss{ time };
 		try {
 			iss >> date::parse(rez::detail::date_format, s);
