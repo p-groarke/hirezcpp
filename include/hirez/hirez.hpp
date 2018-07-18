@@ -51,6 +51,86 @@ enum class language_e : int {
 	turkish = 13,
 };
 
+enum class queue_smi_e : int {
+	arena = 435,
+	joust = 448,
+	conquest = 426,
+	assault = 445,
+	clash = 466,
+	adventures_horde = 495,
+	conquest_ranked = 451,
+	motd = 434,
+	siege_4v4 = 459,
+	joust_3v3_ranked = 450,
+	joust_1v1_ranked = 440,
+	joust_challenge = 441,
+	arena_ai_easy = 457,
+	arena_ai_medium = 468,
+	basic_tutorial = 436,
+	arena_challenge = 438,
+	conquest_challenge = 429,
+	joust_3v3_training = 482,
+	arena_tutorial = 462,
+	arena_training = 483,
+	joust_ai_easy = 474,
+	joust_ai_medium = 456,
+	clash_ai_easy = 478,
+	clash_ai_medium = 469,
+	arena_practice_medium = 472,
+	assault_ai_easy = 481,
+	conquest_ai_easy = 476,
+	clash_tutorial = 471,
+	joust_practice_medium = 473,
+	assault_challenge = 446,
+	assault_ai_medium = 454,
+	arena_practice_easy = 443,
+	clash_challenge = 467,
+	conquest_ai_medium = 461,
+	joust_practice_easy = 464,
+	clash_practice_medium = 477,
+	siege_challenge = 460,
+	assault_practice_medium = 480,
+	conquest_tutorial = 463,
+	clash_practice_easy = 470,
+	assault_practice_easy = 479,
+	conquest_practice_medium = 475,
+	conquest_practice_easy = 458,
+	jungle_practice = 444,
+	jungle_practice_preselected = 496,
+};
+
+enum class queue_pal_e : int {
+	live_casual = 424,
+	live_team_deathmatch = 469,
+	live_onslaught = 452,
+	live_competitive = 428,
+	classic_siege = 465,
+	live_practice_siege = 425,
+	live_onslaught_practice = 453,
+	live_team_deathmatch_practice = 470,
+	live_test_maps = 445,
+	live_battlegrounds_solo = 474,
+	live_battlegrounds_duo = 475,
+	live_battlegrounds_quad = 476,
+	custom_t_magistrates_archives = 472,
+	custom_t_trade_district = 468,
+	custom_s_stonekeep = 423,
+	custom_t_foremans_rise = 471,
+	custom_s_frogisle = 433,
+	custom_s_fishmarket = 431,
+	custom_s_brightmarsh = 458,
+	custom_s_timbermill = 430,
+	custom_s_serpentbeach = 440,
+	custom_s_jaguarfalls = 438,
+	custom_s_splitstonequarry = 459,
+	custom_o_magistrates_archives = 464,
+	custom_s_frozenguard = 432,
+	custom_o_foremans_rise = 462,
+	custom_s_icemines = 439,
+	custom_o_primalcourt = 455,
+	custom_o_snowfalljunction = 454,
+};
+
 template <game_e EndPointFmt = game_e::paladins_pc>
 struct session {
 	const wchar_t* response = L"json";
@@ -407,17 +487,20 @@ struct session {
 	// /getmatchplayerdetails[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{match_id}
 	// Returns player information for a live match.
 
+
 	// /getmatchidsbyqueue[ResponseFormat]/{developerId}/{signature}/{session}/{timestamp}/{queue}/
 	// {date}/{hour}
 	// Lists all Match IDs for a particular Match Queue; useful for API
-	// developers interested in constructing data by Queue.  To limit the
-	// data returned, an {hour} parameter was added (valid values: 0 - 23).
-	// An {hour} parameter of -1 represents the entire day, but be warned
-	// that this may be more data than we can return for certain queues.
+	// developers interested in constructing data by Queue.
+	//
+	// To limit the data returned, an {hour} parameter was added (valid values:
+	// 0 - 23). An {hour} parameter of -1 represents the entire day, but be
+	// warned that this may be more data than we can return for certain queues.
 	// Also, a returned “active_flag” means that there is no match
 	// information/stats for the corresponding match.  Usually due to a
-	// match being in-progress, though there could be other reasons. NOTE -
-	// To avoid HTTP timeouts in the GetMatchIdsByQueue() method, you can
+	// match being in-progress, though there could be other reasons.
+	//
+	// NOTE - To avoid HTTP timeouts in the GetMatchIdsByQueue() method, you can
 	// now specify a 10-minute window within the specified {hour} field to
 	// lessen the size of data returned by appending a “,mm” value to the
 	// end of {hour}. For example, to get the match Ids for the first 10
@@ -546,7 +629,7 @@ struct session {
 				sizeof(si.timestamp));
 	}
 
-	session_info load_session_info() {
+	session_info load_session_info() const {
 		session_info ret{};
 		std::ifstream ifs{ ".cache", std::ios::binary };
 		if (!ifs.is_open())

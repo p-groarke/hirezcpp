@@ -17,33 +17,33 @@ inline std::string to_string(const std::wstring& str) {
 inline std::string dev_id;
 inline std::string auth_key;
 
-TEST(all_apis, create_session) {
-	//{
-	//	rez::session sesh{ dev_id, auth_key };
-	//	EXPECT_EQ(sesh.dev_id, dev_id);
-	//	EXPECT_EQ(sesh.auth_key, auth_key);
-
-	//	rez::session_info createsesh_result = sesh.createsession();
-	//	size_t f = createsesh_result.ret_msg.find("Approved");
-	//	EXPECT_NE(f, std::string::npos);
-	//	EXPECT_NE(createsesh_result.timestamp, date::sys_seconds{});
-	//	nlohmann::json j = createsesh_result;
-	//	printf("createsession response : %s\n\n", j.dump(4).c_str());
-	//}
-
-	//{
-	//	rez::session<rez::game_e::smite_pc> sesh{ dev_id, auth_key };
-	//	EXPECT_EQ(sesh.dev_id, dev_id);
-	//	EXPECT_EQ(sesh.auth_key, auth_key);
-
-	//	rez::session_info createsesh_result = sesh.createsession();
-	//	size_t f = createsesh_result.ret_msg.find("Approved");
-	//	EXPECT_NE(f, std::string::npos);
-	//	EXPECT_NE(createsesh_result.timestamp, date::sys_seconds{});
-	//	nlohmann::json j = createsesh_result;
-	//	printf("createsession response : %s\n\n", j.dump(4).c_str());
-	//}
-}
+// TEST(all_apis, create_session) {
+//	{
+//		rez::session sesh{ dev_id, auth_key };
+//		EXPECT_EQ(sesh.dev_id, dev_id);
+//		EXPECT_EQ(sesh.auth_key, auth_key);
+//
+//		rez::session_info createsesh_result = sesh.createsession();
+//		size_t f = createsesh_result.ret_msg.find("Approved");
+//		EXPECT_NE(f, std::string::npos);
+//		EXPECT_NE(createsesh_result.timestamp, date::sys_seconds{});
+//		nlohmann::json j = createsesh_result;
+//		printf("createsession response : %s\n\n", j.dump(4).c_str());
+//	}
+//
+//	{
+//		rez::session<rez::game_e::smite_pc> sesh{ dev_id, auth_key };
+//		EXPECT_EQ(sesh.dev_id, dev_id);
+//		EXPECT_EQ(sesh.auth_key, auth_key);
+//
+//		rez::session_info createsesh_result = sesh.createsession();
+//		size_t f = createsesh_result.ret_msg.find("Approved");
+//		EXPECT_NE(f, std::string::npos);
+//		EXPECT_NE(createsesh_result.timestamp, date::sys_seconds{});
+//		nlohmann::json j = createsesh_result;
+//		printf("createsession response : %s\n\n", j.dump(4).c_str());
+//	}
+//}
 
 TEST(paladins_pc, everything) {
 	std::string str{};
@@ -59,11 +59,11 @@ TEST(paladins_pc, everything) {
 	EXPECT_NE(f, std::string::npos);
 	printf("ping response : %s\n\n", str.c_str());
 
-	// str = sesh.testsession();
-	// f = str.find(
-	//		"This was a successful test with the following parameters added:");
-	// EXPECT_NE(f, std::string::npos);
-	// printf("testsession response : %s\n\n", str.c_str());
+	str = sesh.testsession();
+	f = str.find(
+			"This was a successful test with the following parameters added:");
+	EXPECT_NE(f, std::string::npos);
+	printf("testsession response : %s\n\n", str.c_str());
 
 	// std::vector<rez::server_status> server_stats =
 	// sesh.gethirezserverstatus(); ASSERT_GT(server_stats.size(), 0);
@@ -77,12 +77,12 @@ TEST(paladins_pc, everything) {
 	// j = dus;
 	// printf("getdataused response : %s\n\n", j.dump(4).c_str());
 
-	std::vector<rez::match_history_pal> mhs = sesh.getmatchhistory("socapex");
-	EXPECT_GT(mhs.size(), 0);
-	EXPECT_EQ(mhs[0].playerName, "socapex");
-	EXPECT_NE(mhs[0].Match_Time, date::sys_seconds{});
-	j = mhs.back();
-	printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::match_history_pal> mhs =
+	// sesh.getmatchhistory("socapex"); EXPECT_GT(mhs.size(), 0);
+	// EXPECT_EQ(mhs[0].playerName, "socapex");
+	// EXPECT_NE(mhs[0].Match_Time, date::sys_seconds{});
+	// j = mhs.back();
+	// printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
 
 	// std::vector<rez::demo_details_pal> dds =
 	// sesh.getdemodetails(mhs[0].Match); EXPECT_GT(dds.size(), 0);
@@ -169,11 +169,11 @@ TEST(smite_pc, everything) {
 	EXPECT_NE(f, std::string::npos);
 	printf("ping response : %s\n\n", str.c_str());
 
-	// str = sesh.testsession();
-	// f = str.find(
-	//		"This was a successful test with the following parameters added:");
-	// EXPECT_NE(f, std::string::npos);
-	// printf("testsession response : %s\n\n", str.c_str());
+	str = sesh.testsession();
+	f = str.find(
+			"This was a successful test with the following parameters added:");
+	EXPECT_NE(f, std::string::npos);
+	printf("testsession response : %s\n\n", str.c_str());
 
 	// std::vector<rez::server_status> server_stats =
 	// sesh.gethirezserverstatus(); ASSERT_GT(server_stats.size(), 0);
@@ -187,12 +187,12 @@ TEST(smite_pc, everything) {
 	// j = dus;
 	// printf("getdataused response : %s\n\n", j.dump(4).c_str());
 
-	std::vector<rez::match_history_smi> mhs = sesh.getmatchhistory(player);
-	EXPECT_GT(mhs.size(), 0);
-	EXPECT_STREQ(mhs[0].playerName.c_str(), player);
-	EXPECT_NE(mhs[0].Match_Time, date::sys_seconds{});
-	j = mhs.back();
-	printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
+	// std::vector<rez::match_history_smi> mhs = sesh.getmatchhistory(player);
+	// EXPECT_GT(mhs.size(), 0);
+	// EXPECT_STREQ(mhs[0].playerName.c_str(), player);
+	// EXPECT_NE(mhs[0].Match_Time, date::sys_seconds{});
+	// j = mhs.back();
+	// printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
 
 	// std::vector<rez::demo_details_smi> dds =
 	// sesh.getdemodetails(mhs[0].Match); EXPECT_GT(dds.size(), 0);
@@ -271,7 +271,7 @@ TEST(smite_pc, everything) {
 	// printf("getmatchdetailsbatch response : %s\n\n", j.dump(4).c_str());
 }
 
-// TEST(testing, things) {
+// TEST(example, date) {
 //	const char* parse_me = "05/28/2018 07:00:00 PM";
 //	const char* date_format = "%m/%d/%Y %I:%M:%S %p";
 //
