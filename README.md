@@ -1,31 +1,20 @@
-# scene-graph-prototype
+# hirezcpp
 
 - Install [conan](https://www.conan.io/).
 - Install [cmake 3.10+](https://cmake.org/) (required for VS2017 fix).
-- Update your compiler to latest.
+- Update MSVC to latest. Tested on 15.7.x.
+
 
 ```
-cd scene_graph_prototype
+cd hirezcpp
 mkdir build && cd build
 conan remote add bincrafters "https://api.bintray.com/conan/bincrafters/public-conan"
+conan remote add bincrafters "https://api.bintray.com/conan/p-groarke/public-conan"
 ..\conan.bat
-```
-
-On Windows:
-```
 cmake .. -A x64 && cmake --build .
 ```
 
-On other platforms:
+Test and lib are in bin/.
 ```
-cmake .. && cmake --build .
-```
-
-Test and benchmark executables are in bin/.
-
-
-Example:
-```
-bin\scene_graph_tests.exe
-bin\scene_graph_benchmarks.exe > NUL
+bin\hirezcpp_tests.exe
 ```
