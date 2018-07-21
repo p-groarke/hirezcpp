@@ -44,7 +44,10 @@ inline void get_v(const nlohmann::json& j, const char* key, T& val) {
 		if (key_found && j.at(key).is_null()) {
 			val = 0;
 		} else if (key_found && j.at(key).is_string()) {
-			val = std::stoi(j.value(key, "0"));
+			std::string s = j.value(key, "0");
+			if (s == "")
+				s = "0";
+			val = std::stoi(s);
 		} else {
 			val = j.value(key, 0);
 		}
@@ -81,7 +84,6 @@ inline void get_v(const nlohmann::json& j, const char* key, T& val) {
 		}
 	}
 }
-
 } // namespace detail
 
 inline std::wstring to_wstring(const std::string& str) {

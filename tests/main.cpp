@@ -1,5 +1,6 @@
 #include <codecvt>
 #include <cstdio>
+#include <filesystem>
 #include <gtest/gtest.h>
 #include <hirez/hirez.hpp>
 #include <locale>
@@ -14,8 +15,20 @@ inline std::string to_string(const std::wstring& str) {
 	static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	return converter.to_bytes(str);
 }
+inline char* argv_0 = nullptr;
 inline std::string dev_id;
 inline std::string auth_key;
+
+// TEST(example, date) {
+//	const char* parse_me = "05/28/2018 07:00:00 PM";
+//	const char* date_format = "%m/%d/%Y %I:%M:%S %p";
+//
+//	std::istringstream iss{ parse_me };
+//	date::sys_seconds s;
+//	iss >> date::parse(date_format, s);
+//
+//	printf("parse result : %s\n", date::format(date_format, s).c_str());
+//}
 
 // TEST(all_apis, create_session) {
 //	{
@@ -46,18 +59,19 @@ inline std::string auth_key;
 //}
 
 TEST(paladins_pc, everything) {
-	std::string str{};
-	size_t f{};
-	nlohmann::json j{};
+	[[maybe_unused]] const char* player = "socapex";
+	[[maybe_unused]] std::string str{};
+	[[maybe_unused]] size_t f{};
+	[[maybe_unused]] nlohmann::json j{};
 
-	rez::session sesh{ dev_id, auth_key };
+	rez::session sesh{ dev_id, auth_key, argv_0 };
 	EXPECT_EQ(sesh.dev_id, dev_id);
 	EXPECT_EQ(sesh.auth_key, auth_key);
 
-	// str = sesh.ping();
-	// f = str.find("Ping successful.");
-	// EXPECT_NE(f, std::string::npos);
-	// printf("ping response : %s\n\n", str.c_str());
+	str = sesh.ping();
+	f = str.find("Ping successful.");
+	EXPECT_NE(f, std::string::npos);
+	printf("ping response : %s\n\n", str.c_str());
 
 	// str = sesh.testsession();
 	// f = str.find(
@@ -72,14 +86,14 @@ TEST(paladins_pc, everything) {
 	// j = server_stats;
 	// printf("getserverstatus response : %s\n\n", j.dump(4).c_str());
 
-	// std::vector<rez::data_used> dus = sesh.getdataused();
-	// EXPECT_GT(dus.size(), 0);
-	// j = dus;
-	// printf("getdataused response : %s\n\n", j.dump(4).c_str());
+	std::vector<rez::data_used> dus = sesh.getdataused();
+	EXPECT_GT(dus.size(), 0);
+	j = dus;
+	printf("getdataused response : %s\n\n", j.dump(4).c_str());
 
-	// std::vector<rez::match_history_pal> mhs =
-	// sesh.getmatchhistory("socapex"); EXPECT_GT(mhs.size(), 0);
-	// EXPECT_EQ(mhs[0].playerName, "socapex");
+	// std::vector<rez::match_history_pal> mhs = sesh.getmatchhistory(player);
+	// EXPECT_GT(mhs.size(), 0);
+	// EXPECT_STREQ(mhs[0].playerName.c_str(), player);
 	// EXPECT_NE(mhs[0].Match_Time, date::sys_seconds{});
 	// j = mhs.back();
 	// printf("getmatchhistory response : %s\n\n", j.dump(4).c_str());
@@ -99,12 +113,12 @@ TEST(paladins_pc, everything) {
 	// printf("getesportsproleaguedetails response : %s\n\n",
 	// j.dump(4).c_str());
 
-	// std::vector<rez::friends> fs = sesh.getfriends("socapex");
+	// std::vector<rez::friends> fs = sesh.getfriends(player);
 	// EXPECT_GT(fs.size(), 0);
 	// j = fs[0];
 	// printf("getfriends response : %s\n\n", j.dump(4).c_str());
 
-	// std::vector<rez::champion_rank> crs = sesh.getchampionranks("socapex");
+	// std::vector<rez::champion_rank> crs = sesh.getchampionranks(player);
 	// EXPECT_GT(crs.size(), 0);
 	// EXPECT_NE(crs[0].LastPlayed, date::sys_seconds{});
 	// j = crs[0];
@@ -150,32 +164,58 @@ TEST(paladins_pc, everything) {
 	//		EXPECT_EQ(v2.Match, id);
 	//	}
 	//}
-	// j = mdbs.back();
+	// j = mdbs.back().back();
 	// printf("getmatchdetailsbatch response : %s\n\n", j.dump(4).c_str());
 
-	// date::year_month_day ymd
-	//		= date::floor<date::days>(std::chrono::system_clock::now());
-	// std::vector<rez::match_id> mids
-	//		= sesh.getmatchidsbyqueue(rez::queue_pal_e::live_casual, ymd, 0, 0);
-	// EXPECT_GT(mids.size(), 0);
-	// j = mids.back();
-	// printf("getmatchidsbyqueue response : %s\n\n", j.dump(4).c_str());
+	auto time = std::chrono::system_clock::now();
+	auto time_days = date::floor<date::days>(time);
+	date::year_month_day ymd = time_days;
+	date::time_of_day tod(time_days - time);
+	int minutes = tod.minutes().count();
+	minutes -= minutes % 10;
+
+	std::vector<rez::match_id> mids = sesh.getmatchidsbyqueue(
+			rez::queue_pal_e::live_casual, ymd, tod.hours().count(), minutes);
+	if (mids.size() > 0) {
+		j = mids.back();
+		printf("getmatchidsbyqueue response : %s\n\n", j.dump(4).c_str());
+
+		if (mids.back().Active_Flag) {
+			// std::vector<rez::match_player_details_smi> mpdss
+			str = sesh.getmatchplayerdetails(mids.back().Match);
+			// EXPECT_GT(mpdsp.size(), 0);
+			// j = mpdss.back();
+			printf("getmatchplayerdetails response : %s\n\n", str.c_str());
+		}
+	}
+
+	// std::vector<rez::league_leaderboard> lls = sesh.getleagueleaderboard(
+	//		rez::queue_pal_e::live_competitive, rez::tier_e::masters_1, 4);
+	// EXPECT_GT(lls.size(), 0);
+	// j = lls.back();
+	// printf("getleagueleaderboard response : %s\n\n", j.dump(4).c_str());
+
+	// std::vector<rez::league_season> lss
+	//		= sesh.getleagueseasons(rez::queue_pal_e::live_competitive);
+	// EXPECT_GT(lss.size(), 0);
+	// j = lss.back();
+	// printf("getleagueseasons response : %s\n\n", j.dump(4).c_str());
 }
 
 TEST(smite_pc, everything) {
-	const char* player = "Rowe";
-	std::string str{};
-	size_t f{};
-	nlohmann::json j{};
+	[[maybe_unused]] const char* player = "Rowe";
+	[[maybe_unused]] std::string str{};
+	[[maybe_unused]] size_t f{};
+	[[maybe_unused]] nlohmann::json j{};
 
-	rez::session<rez::game_e::smite_pc> sesh{ dev_id, auth_key };
+	rez::session<rez::game_e::smite_pc> sesh{ dev_id, auth_key, argv_0 };
 	EXPECT_EQ(sesh.dev_id, dev_id);
 	EXPECT_EQ(sesh.auth_key, auth_key);
 
-	// str = sesh.ping();
-	// f = str.find("Ping successful.");
-	// EXPECT_NE(f, std::string::npos);
-	// printf("ping response : %s\n\n", str.c_str());
+	str = sesh.ping();
+	f = str.find("Ping successful.");
+	EXPECT_NE(f, std::string::npos);
+	printf("ping response : %s\n\n", str.c_str());
 
 	// str = sesh.testsession();
 	// f = str.find(
@@ -278,25 +318,42 @@ TEST(smite_pc, everything) {
 	// j = mdbs.back();
 	// printf("getmatchdetailsbatch response : %s\n\n", j.dump(4).c_str());
 
-	// date::year_month_day ymd
-	//		= date::floor<date::days>(std::chrono::system_clock::now());
-	// std::vector<rez::match_id> mids
-	//		= sesh.getmatchidsbyqueue(rez::queue_smi_e::arena, ymd, 0, 0);
-	// EXPECT_GT(mids.size(), 0);
-	// j = mids.back();
-	// printf("getmatchidsbyqueue response : %s\n\n", j.dump(4).c_str());
-}
+	// auto time = std::chrono::system_clock::now();
+	// auto time_days = date::floor<date::days>(time);
+	// date::year_month_day ymd = time_days;
+	// date::time_of_day tod(time - time_days);
 
-// TEST(example, date) {
-//	const char* parse_me = "05/28/2018 07:00:00 PM";
-//	const char* date_format = "%m/%d/%Y %I:%M:%S %p";
-//
-//	std::istringstream iss{ parse_me };
-//	date::sys_seconds s;
-//	iss >> date::parse(date_format, s);
-//
-//	printf("parse result : %s\n", date::format(date_format, s).c_str());
-//}
+	// int minutes = tod.minutes().count();
+	// minutes -= minutes % 10;
+
+	// std::vector<rez::match_id> mids = sesh.getmatchidsbyqueue(
+	//		rez::queue_smi_e::arena, ymd, tod.hours().count(), minutes);
+	// EXPECT_GT(mids.size(), 0);
+	// if (mids.size() > 0) {
+	//	j = mids.back();
+	//	printf("getmatchidsbyqueue response : %s\n\n", j.dump(4).c_str());
+
+	//	if (mids.back().Active_Flag) {
+	//		std::vector<rez::match_player_details_smi> mpdss
+	//				= sesh.getmatchplayerdetails(mids.back().Match);
+	//		EXPECT_GT(mpdss.size(), 0);
+	//		j = mpdss.back();
+	//		printf("getmatchplayerdetails response : %s\n\n",
+	//				j.dump(4).c_str());
+	//	}
+	//}
+
+	// std::vector<rez::league_season> lss
+	//		= sesh.getleagueseasons(rez::queue_smi_e::conquest_ranked);
+	// EXPECT_GT(lss.size(), 0);
+	// j = lss.back();
+	// printf("getleagueseasons response : %s\n\n", j.dump(4).c_str());
+
+	std::vector<rez::motd> motds = sesh.getmotd();
+	EXPECT_EQ(motds.size(), 20);
+	j = motds.back();
+	printf("getmotd response : %s\n\n", j.dump(4).c_str());
+}
 } // namespace
 
 int main(int argc, char** argv) {
@@ -307,6 +364,7 @@ int main(int argc, char** argv) {
 		std::exit(0);
 	}
 
+	argv_0 = argv[0];
 	dev_id = { argv[1] };
 	auth_key = { argv[2] };
 

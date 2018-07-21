@@ -1,90 +1,10 @@
 #pragma once
+#include "hirez/enums.hpp"
+
 #include <date/date.h>
 #include <string>
 
 namespace rez {
-enum class queue_smi_e : int {
-	arena = 435,
-	joust = 448,
-	conquest = 426,
-	assault = 445,
-	clash = 466,
-	adventures_horde = 495,
-	conquest_ranked = 451,
-	motd = 434,
-	siege_4v4 = 459,
-	joust_3v3_ranked = 450,
-	joust_1v1_ranked = 440,
-	joust_challenge = 441,
-	arena_ai_easy = 457,
-	arena_ai_medium = 468,
-	basic_tutorial = 436,
-	arena_challenge = 438,
-	conquest_challenge = 429,
-	joust_3v3_training = 482,
-	arena_tutorial = 462,
-	arena_training = 483,
-	joust_ai_easy = 474,
-	joust_ai_medium = 456,
-	clash_ai_easy = 478,
-	clash_ai_medium = 469,
-	arena_practice_medium = 472,
-	assault_ai_easy = 481,
-	conquest_ai_easy = 476,
-	clash_tutorial = 471,
-	joust_practice_medium = 473,
-	assault_challenge = 446,
-	assault_ai_medium = 454,
-	arena_practice_easy = 443,
-	clash_challenge = 467,
-	conquest_ai_medium = 461,
-	joust_practice_easy = 464,
-	clash_practice_medium = 477,
-	siege_challenge = 460,
-	assault_practice_medium = 480,
-	conquest_tutorial = 463,
-	clash_practice_easy = 470,
-	assault_practice_easy = 479,
-	conquest_practice_medium = 475,
-	conquest_practice_easy = 458,
-	jungle_practice = 444,
-	jungle_practice_preselected = 496,
-	none = 0,
-};
-
-enum class queue_pal_e : int {
-	live_casual = 424,
-	live_team_deathmatch = 469,
-	live_onslaught = 452,
-	live_competitive = 428,
-	classic_siege = 465,
-	live_practice_siege = 425,
-	live_onslaught_practice = 453,
-	live_team_deathmatch_practice = 470,
-	live_test_maps = 445,
-	live_battlegrounds_solo = 474,
-	live_battlegrounds_duo = 475,
-	live_battlegrounds_quad = 476,
-	custom_t_magistrates_archives = 472,
-	custom_t_trade_district = 468,
-	custom_s_stonekeep = 423,
-	custom_t_foremans_rise = 471,
-	custom_s_frogisle = 433,
-	custom_s_fishmarket = 431,
-	custom_s_brightmarsh = 458,
-	custom_s_timbermill = 430,
-	custom_s_serpentbeach = 440,
-	custom_s_jaguarfalls = 438,
-	custom_s_splitstonequarry = 459,
-	custom_o_magistrates_archives = 464,
-	custom_s_frozenguard = 432,
-	custom_o_foremans_rise = 462,
-	custom_s_icemines = 439,
-	custom_o_primalcourt = 455,
-	custom_o_snowfalljunction = 454,
-	none = 0,
-};
-
 struct session_info {
 	std::string ret_msg{ "" };
 	std::string session_id{ "" };
@@ -101,9 +21,9 @@ struct server_status {
 struct data_used {
 	int Active_Sessions{ 0 };
 	int Concurrent_Sessions{ 0 };
-	int Request_Limit_Daily{ 0 };
-	int Session_Cap{ 0 };
-	int Session_Time_Limit{ 0 };
+	int Request_Limit_Daily{ 7500 };
+	int Session_Cap{ 500 };
+	int Session_Time_Limit{ 15 };
 	int Total_Requests_Today{ 0 };
 	int Total_Sessions_Today{ 0 };
 	std::string ret_msg{ "" };
@@ -844,5 +764,60 @@ struct match_id {
 	bool Active_Flag{};
 	int Match{ 0 };
 	std::string ret_msg{ "" };
+};
+
+struct match_player_details_smi {
+	int Account_Level{ 0 };
+	int GodId{ 0 };
+	std::string GodName{ "" };
+	int Mastery_Level{ 0 };
+	int Match{ 0 };
+	std::string Queue{ "" };
+	int SkinId{ 0 };
+	int Tier{ 0 };
+	std::string playerCreated{ "" };
+	int playerId{ 0 };
+	std::string playerName{ "" };
+	std::string ret_msg{ "" };
+	int taskForce{ 0 };
+	int tierLosses{ 0 };
+	int tierWins{ 0 };
+};
+
+struct league_leaderboard {
+	int Leaves{ 0 };
+	int Losses{ 0 };
+	std::string Name{ "" };
+	int Points{ 0 };
+	int PrevRank{ 0 };
+	int Rank{ 0 };
+	std::string Rank_Stat_Conquest{ "" };
+	std::string Rank_Stat_Duel{ "" };
+	std::string Rank_Stat_Joust{ "" };
+	int Season{ 0 };
+	int Tier{ 0 };
+	int Trend{ 0 };
+	int Wins{ 0 };
+	int player_id{ 0 };
+	std::string ret_msg{ "" };
+};
+
+struct league_season {
+	bool complete{ false };
+	int id{ 2 };
+	std::string name{ "" };
+	std::string ret_msg{ "" };
+};
+
+struct motd {
+	std::string description{ "" };
+	std::string gameMode{ "" };
+	int maxPlayers{ 0 };
+	std::string name{ "" };
+	std::string ret_msg{ "" };
+	date::sys_seconds startDateTime{};
+	std::string team1GodsCSV{ "" };
+	std::string team2GodsCSV{ "" };
+	std::string title{ "" };
 };
 } // namespace rez

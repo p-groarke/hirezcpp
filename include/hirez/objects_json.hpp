@@ -1569,4 +1569,118 @@ void from_json(const nlohmann::json& j, match_id& obj) {
 	REZ_FROM_J(obj, Match, j);
 	REZ_FROM_J(obj, ret_msg, j);
 }
+
+void to_json(nlohmann::json& j, const match_player_details_smi& obj) {
+	j = {
+		REZ_TO_J(obj, Account_Level),
+		REZ_TO_J(obj, GodId),
+		REZ_TO_J(obj, GodName),
+		REZ_TO_J(obj, Mastery_Level),
+		REZ_TO_J(obj, Match),
+		REZ_TO_J(obj, Queue),
+		REZ_TO_J(obj, SkinId),
+		REZ_TO_J(obj, Tier),
+		REZ_TO_J(obj, playerCreated),
+		REZ_TO_J(obj, playerId),
+		REZ_TO_J(obj, playerName),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, taskForce),
+		REZ_TO_J(obj, tierLosses),
+		REZ_TO_J(obj, tierWins),
+	};
+}
+void from_json(const nlohmann::json& j, match_player_details_smi& obj) {
+	REZ_FROM_J(obj, Account_Level, j);
+	REZ_FROM_J(obj, GodId, j);
+	REZ_FROM_J(obj, GodName, j);
+	REZ_FROM_J(obj, Mastery_Level, j);
+	REZ_FROM_J(obj, Match, j);
+	REZ_FROM_J(obj, Queue, j);
+	REZ_FROM_J(obj, SkinId, j);
+	REZ_FROM_J(obj, Tier, j);
+	REZ_FROM_J(obj, playerCreated, j);
+	REZ_FROM_J(obj, playerId, j);
+	REZ_FROM_J(obj, playerName, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, taskForce, j);
+	REZ_FROM_J(obj, tierLosses, j);
+	REZ_FROM_J(obj, tierWins, j);
+}
+
+void to_json(nlohmann::json& j, const league_leaderboard& obj) {
+	j = {
+		REZ_TO_J(obj, Leaves),
+		REZ_TO_J(obj, Losses),
+		REZ_TO_J(obj, Name),
+		REZ_TO_J(obj, Points),
+		REZ_TO_J(obj, PrevRank),
+		REZ_TO_J(obj, Rank),
+		REZ_TO_J(obj, Rank_Stat_Conquest),
+		REZ_TO_J(obj, Rank_Stat_Duel),
+		REZ_TO_J(obj, Rank_Stat_Joust),
+		REZ_TO_J(obj, Season),
+		REZ_TO_J(obj, Tier),
+		REZ_TO_J(obj, Trend),
+		REZ_TO_J(obj, Wins),
+		REZ_TO_J(obj, player_id),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, league_leaderboard& obj) {
+	REZ_FROM_J(obj, Leaves, j);
+	REZ_FROM_J(obj, Losses, j);
+	REZ_FROM_J(obj, Name, j);
+	REZ_FROM_J(obj, Points, j);
+	REZ_FROM_J(obj, PrevRank, j);
+	REZ_FROM_J(obj, Rank, j);
+	REZ_FROM_J(obj, Rank_Stat_Conquest, j);
+	REZ_FROM_J(obj, Rank_Stat_Duel, j);
+	REZ_FROM_J(obj, Rank_Stat_Joust, j);
+	REZ_FROM_J(obj, Season, j);
+	REZ_FROM_J(obj, Tier, j);
+	REZ_FROM_J(obj, Trend, j);
+	REZ_FROM_J(obj, Wins, j);
+	REZ_FROM_J(obj, player_id, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const league_season& obj) {
+	j = {
+		REZ_TO_J(obj, complete),
+		REZ_TO_J(obj, id),
+		REZ_TO_J(obj, name),
+		REZ_TO_J(obj, ret_msg),
+	};
+}
+void from_json(const nlohmann::json& j, league_season& obj) {
+	REZ_FROM_J(obj, complete, j);
+	REZ_FROM_J(obj, id, j);
+	REZ_FROM_J(obj, name, j);
+	REZ_FROM_J(obj, ret_msg, j);
+}
+
+void to_json(nlohmann::json& j, const motd& obj) {
+	j = {
+		REZ_TO_J(obj, description),
+		REZ_TO_J(obj, gameMode),
+		REZ_TO_J(obj, maxPlayers),
+		REZ_TO_J(obj, name),
+		REZ_TO_J(obj, ret_msg),
+		REZ_TO_J(obj, startDateTime),
+		REZ_TO_J(obj, team1GodsCSV),
+		REZ_TO_J(obj, team2GodsCSV),
+		REZ_TO_J(obj, title),
+	};
+}
+void from_json(const nlohmann::json& j, motd& obj) {
+	REZ_FROM_J(obj, description, j);
+	REZ_FROM_J(obj, gameMode, j);
+	REZ_FROM_J(obj, maxPlayers, j);
+	REZ_FROM_J(obj, name, j);
+	REZ_FROM_J(obj, ret_msg, j);
+	REZ_FROM_J(obj, startDateTime, j);
+	REZ_FROM_J(obj, team1GodsCSV, j);
+	REZ_FROM_J(obj, team2GodsCSV, j);
+	REZ_FROM_J(obj, title, j);
+}
 } // namespace rez
